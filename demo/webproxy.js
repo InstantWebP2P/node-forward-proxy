@@ -6,7 +6,7 @@ var srv = new Proxy(function(err, proxy){
         return 
     }
     
-    // start forward proxy service
+    // start http proxy service
     var http = require('http');
     var pxySrv = http.createServer();
     
