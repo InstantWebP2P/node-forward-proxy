@@ -19,10 +19,7 @@
     "node": ">=0.8.0"
   },
   "main": "proxy",
-  "bin": {
-    "http-proxy": "./bin/http-proxy",
-    "socks-proxy": "./bin/socks-proxy",
-  },
+  "bin": {},
   "dependencies": {
     "iwebpp.io": "latest",
     "socks5": "0.1.x",
