@@ -1,4 +1,4 @@
 iwebpp.io-proxy
 ===============
 
-p2p http forward/reverse and socks proxy based on iWebPP.io
+p2p http forward and socks proxy based on iWebPP.io
