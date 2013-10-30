@@ -63,7 +63,7 @@ var Proxy = module.exports = function(options, fn){
 	// 1.1
 	// check ready
 	nmcln.on('ready', function(){
-	    if (debug) console.log('name-client ready on vURL:'+nmcln.vurl);
+	    console.log('forward-proxy ready on vURL:'+nmcln.vurl);
 	    
 	    // 2.
 	    // fill dedicated export proxy
