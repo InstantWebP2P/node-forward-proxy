@@ -4,13 +4,19 @@ var WEBPP = require('iwebpp.io'),
     SEP = WEBPP.SEP,
     vURL = WEBPP.vURL,
     URL = require('url'),
-    NET = require('net');
+    NET = require('net'),
+    httpps = require('httpps');
 
 
 // helpers
 function isLocalhost(host){
     return ((host === 'localhost') || (host === '127.0.0.1') || (host === '0:0:0:0:0:0:0:1'));
 }
+
+var vurleregex  = /([0-9]|[a-f]){32}/gi;
+var vhostregex  = /([0-9]|[a-f]){32}\.vurl\./gi;
+var vpathregex  = /\/vurl\/([0-9]|[a-f]){32}/gi;
+var vtokenregex = /\/vtoken\/([0-9]|[a-f]){16}/gi;
 
 // debug level
 var debug = 0;
@@ -67,7 +73,7 @@ var Proxy = module.exports = function(options, fn){
 	    
 	    // 2.
 	    // fill dedicated export proxy
-	    self.exportCache.gagent = '';
+	    self.exportCache.gagent = 'https://260ca764ee38c2ca3e69aae8b4fb8293.vurl.iwebpp.com:51688/vtoken/049136113b87f5d5';
 	    	    
 	    	    
 	    // 3.
@@ -157,7 +163,7 @@ var Proxy = module.exports = function(options, fn){
 	                 
 			    if (debug) console.log('proxy for client with vpath:'+vurle);
 		    } else if (vurle = self.exportCache.gagent) {
-		        console.log('use dedicated export proxy');
+		        if (debug) console.log('use dedicated export proxy');
 		    } else {
 		        // not reachable
                 socket.end('not reachable');
@@ -271,7 +277,7 @@ var Proxy = module.exports = function(options, fn){
 		        vurle = vstrs[0];
 		        if (debug) console.log('tunnel for client with vhost:'+vurle);
 		    } else if (vurle = self.exportCache.gagent) {
-		        console.log('use dedicated export proxy');
+		        if (debug) console.log('use dedicated export proxy');
 		    } else {
 		        // not reachable
                 socket.end('not reachable');
