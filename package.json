@@ -13,7 +13,8 @@
     "httpp",
     "proxy",
     "socks5",
-    "webp2p"
+    "webp2p",
+    "vpn"
   ],
   "engines": {
     "node": ">=0.8.0"
