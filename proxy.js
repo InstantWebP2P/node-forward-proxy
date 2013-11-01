@@ -5,7 +5,8 @@ var WEBPP = require('iwebpp.io'),
     vURL = WEBPP.vURL,
     URL = require('url'),
     NET = require('net'),
-    httpps = require('httpps');
+    httpps = require('httpps'),
+    url = require('url');
 
 
 // helpers
@@ -73,7 +74,7 @@ var Proxy = module.exports = function(options, fn){
 	    
 	    // 2.
 	    // fill dedicated export proxy
-	    self.exportCache.gagent = 'https://260ca764ee38c2ca3e69aae8b4fb8293.vurl.iwebpp.com:51688/vtoken/049136113b87f5d5';
+	    self.exportCache.gagent = 'https://b60b1090dad5868f708435c6632d268a.vurl.iwebpp.com:51688/vtoken/4d4756f3475b5d05';
 	    	    
 	    	    
 	    // 3.
@@ -128,9 +129,172 @@ var Proxy = module.exports = function(options, fn){
 	    // import http proxy
 	    // TBD... to proxy http, please use SOCKS proxy
 	    function importHttpProxy(req, res){
-            res.writeHead(400);
-            res.end('not support, please use SOCKS proxy for http');
-            console.error('not support, please use SOCKS proxy for http');
+	    	var vurle, vstrs, urle = req.url;
+		    
+		    if (debug) console.log('proxy to '+urle+',headers:'+JSON.stringify(req.headers));
+		    
+		    function resErr(err){
+		        res.writeHead(500);
+				res.end(err);
+		    }
+		    
+		    // 0.
+		    // find next hop
+		    
+		    
+		    // 1.
+		    // match vURL pattern:
+		    // - vhost like http(s)://"xxx.vurl."local.iwebpp.com
+		    // - vpath like http(s)://local.iwebpp.com"/vurl/xxx"
+		    if (vstrs = req.headers.host.match(vhostregex)) {
+		        vurle = vstrs[0];
+		        if (debug) console.log('proxy for client with vhost:'+vurle);
+		    } else if (vstrs = urle.match(vpathregex)) {
+			    vurle = vstrs[0];	       
+			    
+			    // prune vpath in req.url
+	            req.url = req.url.replace(vurle, '');
+			    
+			    // prune /local/wxxxp path
+	            // TBD ... cascade routing
+	            req.url = req.url.replace(vpathwpregex, '');
+	                 
+			    if (debug) console.log('proxy for client with vpath:'+vurle);
+		    } else if (vurle = self.exportCache.gagent) {
+		        if (debug) console.log('use dedicated export proxy');
+		    } else {
+		        // not reachable
+                resErr('not reachable');
+                console.error('not reachable:'+urle);
+                                
+                return;
+		    }
+		    
+		    if (debug) console.log('tunnel proxy for client request.headers:'+JSON.stringify(req.headers)+
+		                           ',url:'+urle+',vurl:'+vurle);
+		                           
+		    // 1.1
+	        // !!! rewrite req.url to remove vToken parts
+	        // TBD ... vToken check
+	        req.url = req.url.replace(vtokenregex, '');                      
+		    
+		    // 2.
+			// get peer info by vURL
+		    nmcln.getvURLInfo(vurle, function(err, routing){
+		        // 2.1
+		        // check error and authentication 
+		        if (err || !routing) {
+		            // invalid vURL
+	                resErr('invalid URL');
+	                console.error('invalid URL:'+urle);
+	                                
+	                return;
+		        } else {
+			        // 3.
+			        // get peer endpoint
+	                var dstip, dstport;
+	                
+	                if ((nmcln.oipaddr === routing.dst.ipaddr) || 
+	                    (isLocalhost(nmcln.oipaddr) && isLocalhost(routing.dst.ipaddr))) {
+	                    dstip   = routing.dst.lipaddr;
+	                    dstport = routing.dst.lport;
+	                } else {
+	                    dstip   = routing.dst.ipaddr;
+	                    dstport = routing.dst.port;
+	                }
+			        		    
+			        // 5.
+			        // traverse STUN session to peer
+			        nmcln.trvsSTUN(vurle, function(err, stun){
+			            if (err || !stun) {
+				            // STUN not availabe
+		                    resErr('STUN not available, please use TURN');
+		                    console.error('STUN not available:'+urle);
+			            } else {
+			                // 6.
+						    // setup tunnel to target by make CONNECT request
+						    var roptions = {
+							        port: dstport,
+							    hostname: dstip,
+							      method: 'CONNECT',
+							        path: (/(:\d+)$/gi).test(req.headers.host) ? req.headers.host : req.headers.host+':80',
+							       agent: false,
+							        
+							    // set user-specific feature,like maxim bandwidth,etc
+			                    localAddress: {
+			                        addr: nmcln.ipaddr,
+			                        port: nmcln.port, 
+			                        
+			                        opt: {
+			                            mbw: options.mbw || null
+			                        }
+			                    }
+					        };
+							
+							var rreq = httpps.request(roptions);
+							rreq.end();
+							rreq.on('error', function(e) {
+						        console.log("tunnel proxy, CONNECT request error: " + e);					        
+						        resErr("tunnel proxy, CONNECT request error: " + e);
+						    });
+						    
+							if (debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
+							rreq.on('connect', function(rres, rsocket, rhead) {
+							    if (debug) console.log('tunnel proxy, got connected');
+							
+							    rsocket.on('error', function(e) {
+							        console.log("tunnel proxy, socket error: " + e);
+							        resErr("tunnel proxy, socket error: " + e);
+							    });
+							    
+							    // request on tunnel connection
+							    var toptions = {
+								              method: req.method,
+								                path: req.url.match(/^(http:)/gi)? url.parse(req.url).path : req.url,
+								               agent: false,
+								               
+								             // set headers
+								             headers: req.headers,
+								             
+								    // pass rsocket which's request on           
+								    createConnection: function(port, host, options){
+								        return rsocket
+								    } 
+						        };
+								
+								var treq = httpps.request(toptions, function(tres){
+								    if (debug) console.log('tunnel proxy, got response');
+								    
+								    // set headers
+								    Object.keys(tres.headers).forEach(function (key) {
+								      res.setHeader(key, tres.headers[key]);
+								    });
+								    res.writeHead(tres.statusCode);
+								    
+								    tres.pipe(res);
+								    
+								    tres.on('error', function(e) {
+							            console.log("tunnel proxy, tunnel response error: " + e);					        
+							            resErr("tunnel proxy, tunnel response error: " + e);
+						            });
+								});
+								treq.on('error', function(e) {
+							        console.log("tunnel proxy, tunnel request error: " + e);					        
+							        resErr("tunnel proxy, tunnel request error: " + e);
+						        });
+								req.pipe(treq);
+								req.on('error', resErr);
+								req.on('aborted', function () {
+								    treq.abort();
+								});
+								if (req.trailers) {
+								    treq.end();
+								}
+							});
+			            }
+			        });		        
+		        }
+	        });
 	    }
 	    
 	    // 5.1
