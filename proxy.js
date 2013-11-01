@@ -20,7 +20,7 @@ var vpathregex  = /\/vurl\/([0-9]|[a-f]){32}/gi;
 var vtokenregex = /\/vtoken\/([0-9]|[a-f]){16}/gi;
 
 // debug level
-var debug = 0;
+var debug = 1;
 
 // Proxy class
 // a proxy will contain one iwebpp.io name-client
@@ -74,7 +74,7 @@ var Proxy = module.exports = function(options, fn){
 	    
 	    // 2.
 	    // fill dedicated export proxy
-	    self.exportCache.gagent = 'https://b60b1090dad5868f708435c6632d268a.vurl.iwebpp.com:51688/vtoken/4d4756f3475b5d05';
+	    self.exportCache.gagent = 'https://ad7ada89f3afbe8cf7d865203d98904c.vurl.iwebpp.com:51688/vtoken/696b83366eaa5787';
 	    	    
 	    	    
 	    // 3.
@@ -134,14 +134,18 @@ var Proxy = module.exports = function(options, fn){
 		    if (debug) console.log('proxy to '+urle+',headers:'+JSON.stringify(req.headers));
 		    
 		    function resErr(err){
-		        res.writeHead(500);
-				res.end(err);
+		        try {
+			        res.writeHead(500);
+					res.end(err);
+				} catch (e) {
+				    console.log('res.end exception '+e);
+				}
 		    }
 		    
 		    // 0.
 		    // find next hop
 		    
-		    
+		    		    
 		    // 1.
 		    // match vURL pattern:
 		    // - vhost like http(s)://"xxx.vurl."local.iwebpp.com
