@@ -20,7 +20,7 @@ var vpathregex  = /\/vurl\/([0-9]|[a-f]){32}/gi;
 var vtokenregex = /\/vtoken\/([0-9]|[a-f]){16}/gi;
 
 // debug level
-var debug = 1;
+var debug = 0;
 
 // Proxy class
 // a proxy will contain one iwebpp.io name-client
