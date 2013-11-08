@@ -74,7 +74,7 @@ var Proxy = module.exports = function(options, fn){
 	    
 	    // 2.
 	    // fill dedicated export proxy
-	    self.exportCache.gagent = 'https://10c38df4af591cc873a6df7efe755e03.vurl.iwebpp.com:51688/vtoken/46ce2a28c16d3859';
+	    self.exportCache.gagent = 'https://34324d863107486078285ce734968097.vurl.iwebpp.com:51688/vtoken/3ed0ded65dd25c3a';
 	    	    
 	    	    
 	    // 3.

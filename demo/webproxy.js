@@ -15,4 +15,18 @@ var srv = new Proxy(function(err, proxy){
     
     pxySrv.listen(51866, 10);
     console.log('http forwar proxy server listen on port 51866');
+    
+    // start https proxy service, only chrome support
+    var fs = require('fs');
+    var https = require('https');
+    var pxySrvs = https.createServer({
+     key: fs.readFileSync('./certs/server-key.pem'),
+    cert: fs.readFileSync('./certs/server-cert.pem')
+    });
+    
+    pxySrvs.on('request', proxy.httpApp.proxy);
+    pxySrvs.on('connect', proxy.httpApp.tunnel);
+    
+    pxySrvs.listen(51863, 10);
+    console.log('https forwar proxy server listen on port 51863');
 });
