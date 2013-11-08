@@ -74,7 +74,7 @@ var Proxy = module.exports = function(options, fn){
 	    
 	    // 2.
 	    // fill dedicated export proxy
-	    self.exportCache.gagent = 'https://12586ba3c7ccf158524962f03d6ac0ac.vurl.iwebpp.com:51688/vtoken/3b4d9d19cb07c489';
+	    self.exportCache.gagent = 'https://10c38df4af591cc873a6df7efe755e03.vurl.iwebpp.com:51688/vtoken/46ce2a28c16d3859';
 	    	    
 	    	    
 	    // 3.
@@ -267,7 +267,7 @@ var Proxy = module.exports = function(options, fn){
 						        };
 								
 								var treq = httpps.request(toptions, function(tres){
-								    if (debug) console.log('tunnel proxy, got response');
+								    if (debug) console.log('tunnel proxy, got response, headers:'+JSON.stringify(tres.headers));
 								    
 								    // set headers
 								    Object.keys(tres.headers).forEach(function (key) {
