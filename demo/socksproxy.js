@@ -10,7 +10,7 @@ var srv = new Proxy(function(err, proxy){
     var socks = require('socks5');
     var sockspxySrv = socks.createServer(proxy.socksApp);
     
-    sockspxySrv.listen(51888, 10);
+    sockspxySrv.listen(51888, 50);
     
     sockspxySrv.on('error', function (e) {
         console.error('SERVER ERROR: %j', e);
@@ -19,7 +19,7 @@ var srv = new Proxy(function(err, proxy){
 	        setTimeout(function () {
 	            console.log('Reconnecting to %s:%s', HOST, PORT);
 	            sockspxySrv.close();
-	            sockspxySrv.listen(51888, 10);
+	            sockspxySrv.listen(51888, 50);
 	        }, 10000);
 	    }
     });
