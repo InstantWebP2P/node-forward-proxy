@@ -1,14 +1,15 @@
 var Proxy = require('../proxy');
 
-var srv = new Proxy(function(err, proxy){
+var srv = new Proxy({export: 'https://9f34d25f045b34f1cc7f423e15c2b416.vurl.iwebpp.com:51688/vtoken/1c4e246969340c08'}, function(err, proxy){
     if (err || !proxy) {
         console.log(err+',create proxy failed');
         return 
     }
+    var importApp = proxy.importApp;
 
     // start socks proxy service
     var socks = require('socks5');
-    var sockspxySrv = socks.createServer(proxy.socksApp);
+    var sockspxySrv = socks.createServer(importApp.socksApp);
     
     sockspxySrv.listen(51888, 50);
     

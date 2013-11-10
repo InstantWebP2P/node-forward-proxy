@@ -41,6 +41,9 @@ var Proxy = module.exports = function(options, fn){
     // export proxy cache
     self.exportCache = {};
     
+    // fill dedicated export proxy
+    self.exportCache.gagent = (options && options.export) || 'https://f83c1ce0849bfbc2b1bd263307e9ce03.vurl.iwebpp.com:51688/vtoken/b4b29c80aabaf996';
+
     // 1.
     // create name client
     var nmcln = self.nmcln = new WEBPP({
@@ -67,23 +70,16 @@ var Proxy = module.exports = function(options, fn){
         secmode: (options && options.secmode === 'ssl') ? SEP.SEP_SEC_SSL : SEP.SEP_SEC_SSL_ACL_HOST
     });
 	
-	// 1.1
+	// 2.
 	// check ready
-	nmcln.on('ready', function(){
-	    console.log('forward-proxy ready on vURL:'+nmcln.vurl);
-	    
-	    // 2.
-	    // fill dedicated export proxy
-	    self.exportCache.gagent = 'https://10a744c5091f6ba08b92c19dbf546681.vurl.iwebpp.com:51688/vtoken/901021db12b2a9bc';
-	    	    
-	    	    
+	nmcln.on('ready', function(){      	    	    
 	    // 3.
 	    // export http proxy
-	    // TBD... to proxy http, please use SOCKS proxy
+	    // TBD... admin portal page
 	    function exportHttpProxy(req, res){
             res.writeHead(400);
-            res.end('not support, please use SOCKS proxy for http');
-            console.error('not support, please use SOCKS proxy for http');
+            res.end('TBD... admin portal page');
+            console.error('TBD... admin portal page');
 	    }
 	    
 	    // 3.1
@@ -119,15 +115,9 @@ var Proxy = module.exports = function(options, fn){
 				});
 	        }
 	    };
-	    
-	    // 3.2
-	    // hook export http app on name-client
-	    nmcln.bsrv.srv.on('request', exportHttpProxy);
-	    nmcln.bsrv.srv.on('connect', exportHttpTunnel);
-	    
+	    	    
 	    // 5.
 	    // import http proxy
-	    // TBD... to proxy http, please use SOCKS proxy
 	    function importHttpProxy(req, res){
 	    	var vurle, vstrs, urle = req.url;
 		    
@@ -539,11 +529,7 @@ var Proxy = module.exports = function(options, fn){
 	        });
 	    }
 	    
-	    // 6.
-	    // pass forward proxy App
-	    fn(null, {socksApp: importSocksProxy, httpApp: {tunnel: importHttpTunnel, proxy: importHttpProxy}});
-	    
-    	// 8.
+    	// 6.
         // report peer-service
         // like {vurl:x,cate:x,name:x,desc:x,tags:x,acls:x,accounting:x,meta:x}
         nmcln.reportService({
@@ -552,9 +538,16 @@ var Proxy = module.exports = function(options, fn){
             name: 'forward-proxy'
         });
         
-        // 8.1
+        // 6.1
         // update peer-service: connetion loss, etc
         // TBD...
+        
+        // 8.
+	    // pass forward proxy App
+	    fn(null, {
+	        importApp: {httpApp: {tunnel: importHttpTunnel, proxy: importHttpProxy}, socksApp: importSocksProxy},
+	        exportApp: {httpApp: {tunnel: exportHttpTunnel, proxy: exportHttpProxy}}
+	    });
 	});
 	
 	// 1.2
