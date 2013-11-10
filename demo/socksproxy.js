@@ -25,5 +25,5 @@ var srv = new Proxy({export: 'https://9f34d25f045b34f1cc7f423e15c2b416.vurl.iweb
 	        }, 10000);
 	    }
     });
-    console.log('socks proxy server listen on port 51888');
+    console.log('Socks forward proxy server listen on port 51888');
 });

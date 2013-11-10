@@ -12,5 +12,5 @@ var srv = new Proxy(function(err, proxy){
     nmcln.bsrv.srv.on('request', exportApp.httpApp.proxy);
     nmcln.bsrv.srv.on('connect', exportApp.httpApp.tunnel);
         
-    console.log('forward-proxy export ready on vURL: '+nmcln.vurl);
+    console.log('Export service ready on vURL: '+nmcln.vurl);
 });
