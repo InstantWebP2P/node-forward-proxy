@@ -26,6 +26,7 @@ var debug = 0;
 // a proxy will contain one iwebpp.io name-client
 // - options: user custom parameters, like {secmode: ..., usrkey: ..., domain: ..., endpoints: ..., turn: ...}
 // - options.secmode: ssl, enable ssl/https; acl, enable ssl/https,host-based ACL
+// - options.export: Forward-proxy's Export service vURL
 // -      fn: callback to pass proxy informations
 var Proxy = module.exports = function(options, fn){ 
     var self = this;
