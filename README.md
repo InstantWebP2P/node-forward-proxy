@@ -3,7 +3,25 @@ node-forward-proxy
 
 p2p http forward and socks proxy based on iWebPP.io and Node.js
 
+### Features
 
+* http / socks proxy server as forward-proxy import service
+* http connect tunnel over iWebPP.io STUN session as forward-proxy export service
+* secure p2p proxy tunnel
+* high udp data transfer performance
+
+### Install
+* npm install forward-proxy, or git clone https://github.com/InstantWebP2P/forward-proxy.git && cd forward-proxy && npm install
+* forward-proxy depend on node-httpp, please npm install httpp-binary.if the binary didn't work, just build it from source:
+  https://github.com/InstantWebP2P/node-httpp
+
+### Usage/API
+* for export service, refer to demo/export.js
+* for http proxy server, refer to demo/webproxy.js
+* for socks proxy server, refer to demo/socksproxy.js
+* for http/socks server, please fill export service vURL in options.export, when create Proxy instance
+* web browser is http proxy / socks proxy client
+* after setup export service and start http or socks server, then set web browser proxy settings point to http/socks server
 
 <br/>
 ### License

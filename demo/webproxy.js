@@ -1,5 +1,6 @@
 var Proxy = require('../proxy');
 
+// fill Export service's vURL as options.export
 var srv = new Proxy({export: 'https://9f34d25f045b34f1cc7f423e15c2b416.vurl.iwebpp.com:51688/vtoken/1c4e246969340c08'}, function(err, proxy){
     if (err || !proxy) {
         console.log(err+',create proxy failed');
