@@ -43,7 +43,7 @@ var Proxy = module.exports = function(options, fn){
     self.exportCache = {};
     
     // fill dedicated export proxy
-    self.exportCache.gagent = (options && options.export) || 'https://f83c1ce0849bfbc2b1bd263307e9ce03.vurl.iwebpp.com:51688/vtoken/b4b29c80aabaf996';
+    self.exportCache.gagent = options && options.export;
 
     // 1.
     // create name client
