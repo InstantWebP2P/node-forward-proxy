@@ -22,7 +22,7 @@ p2p http forward and socks proxy based on iWebPP.io and Node.js
 * for http/socks server, please fill export service vURL in options.export, when create Proxy instance
 * web browser is http proxy / socks proxy client
 * after setup export service and start http or socks server, then set web browser proxy settings point to http/socks server
-* for forward-proxy util, refer to bin/forward-proxy. to start it, just node bin/forward-proxy --http_port xxx --socks_port xxx --export_vurl vURL --enable_export
+* for forward-proxy util, refer to bin/forward-proxy. to start it, just node bin/forward-proxy --k usrkey(MUST) --http_port xxx --socks_port xxx --export_vurl vURL --enable_export
 
 <br/>
 ### License

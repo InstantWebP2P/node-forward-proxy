@@ -14,12 +14,12 @@ var help = [
     "Starts a forward-proxy server using the specified command-line options",
     "",
     "options:",
-    "      --http_port     51866            Http proxy port",
-    "      --socks_port    51888            Socks proxy port",
-    "      --export_vurl   URL              Export service's vURL",
-    "      --enable_export 1 or 0           Turn on export service",
-    "  -k, --key           User key         Key for the registered user",
-    "  -u, --user          USER             User to drop privileges once server socket is bound",
+    "      --http_port     51866            Http proxy port, Optional",
+    "      --socks_port    51888            Socks proxy port, Optional",
+    "      --export_vurl   URL              Export service's vURL, Optional",
+    "      --enable_export 1 or 0           Turn on export service, Optional",
+    "  -k, --key           User key         Key for the registered user, MUST",
+    "  -u, --user          USER             User to drop privileges once server socket is bound, Optional",
     "  -h, --help                           You're staring at it"
 ].join('\n');
 
@@ -47,7 +47,7 @@ if ((http_port || socks_port) && !export_vurl) {
 //
 
 // fill Export service's vURL as options.export
-var srv = new Proxy({export: export_vurl}, function(err, proxy){
+var srv = new Proxy({export: export_vurl, usrkey: usrkey}, function(err, proxy){
     if (err || !proxy) {
         console.log(err+',create proxy failed');
         return 
@@ -96,7 +96,7 @@ var srv = new Proxy({export: export_vurl}, function(err, proxy){
 	    nmcln.bsrv.srv.on('request', exportApp.httpApp.proxy);
 	    nmcln.bsrv.srv.on('connect', exportApp.httpApp.tunnel);
 	        
-	    console.log('Export service ready on vURL: '+nmcln.vurl);
+	    console.log('Export service ready on vURL: '+nmcln.vurl+'\nUsrkey: '+nmcln.usrinfo.usrkey);
     }
 });
 
