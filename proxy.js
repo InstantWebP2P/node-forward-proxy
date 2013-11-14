@@ -101,18 +101,20 @@ var Proxy = module.exports = function(options, fn){
                 if (debug) console.log('http tunnel proxy, connect to %s:%d', srvip, srvport);
                 var srvSocket = NET.connect(srvport, srvip, function() {
                     if (debug) console.log('http tunnel proxy, got connected!');   
-                         
+                    
+                    srvSocket.write(head); 
+				    socket.pipe(srvSocket);
+				        
 				    socket.write('HTTP/1.1 200 Connection Established\r\n' +
 				                 'Proxy-agent: Node-Proxy\r\n' +
-				                 '\r\n');					    
+				                 '\r\n');
 				    srvSocket.pipe(socket);
-				    socket.pipe(srvSocket);
                 });
   
 				srvSocket.setNoDelay(true);
 				    
 				srvSocket.on('error', function(e) {
-				    console.log("http tunnel proxy, socket error: " + e);
+				    console.log("http tunnel proxy to " + req.url + ", socket error: " + e);
 				    socket.end();
 				});
 	        }
