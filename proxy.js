@@ -11,7 +11,8 @@ var WEBPP = require('iwebpp.io'),
 
 // helpers
 function isLocalhost(host){
-    return ((host === 'localhost') || (host === '127.0.0.1') || (host === '0:0:0:0:0:0:0:1'));
+    return ((host === 'localhost') || (host === '127.0.0.1') ||
+            (host === '0:0:0:0:0:0:0:1') || (host === '::1'));
 }
 
 var vurleregex  = /([0-9]|[a-f]){32}/gi;
