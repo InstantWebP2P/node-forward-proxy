@@ -38,6 +38,10 @@ var http_port = argv.http_port,
 //
 // Check arguments
 //
+if (!(http_port || socks_port)) {
+    http_port = 51866;
+    socks_port = 51888;
+}
 if ((http_port || socks_port) && !export_vurl) {
     util.puts('Please pass Export service vURL by --export_vurl xxx');
     return util.puts(help);
