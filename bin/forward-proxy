@@ -38,7 +38,7 @@ var http_port = argv.http_port,
 //
 // Check arguments
 //
-if (!(http_port || socks_port)) {
+if (!(http_port || socks_port) && !enable_export) {
     http_port = 51866;
     socks_port = 51888;
 }
