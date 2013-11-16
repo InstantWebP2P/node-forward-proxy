@@ -3,7 +3,6 @@
 //
 // Please install node-httpp binary in your system exec dir, like /usr/bin/ or /usr/local/bin/
 //
-
 var util  = require('util'),
     argv = require('optimist').argv,
     Proxy = require('../proxy');
@@ -19,6 +18,7 @@ var help = [
     "      --export_vurl   URL              Export service's vURL, Optional",
     "      --enable_export 1 or 0           Turn on export service, Optional",
     "  -k, --key           User key         Key for the registered user, MUST",
+    "  -s  --secmode       ssl or acl       Secure mode: ssl or host-based ACL",
     "  -u, --user          USER             User to drop privileges once server socket is bound, Optional",
     "  -h, --help                           You're staring at it"
 ].join('\n');
@@ -31,6 +31,7 @@ var http_port = argv.http_port,
     socks_port =  argv.socks_port,
     export_vurl = argv.export_vurl,
     enable_export = argv.enable || argv.enable_export,
+    secmode = argv.s || argv.secmode,
     user = argv.u || argv.user,
     usrkey = argv.k || argv.key;
 
@@ -47,7 +48,7 @@ if ((http_port || socks_port) && !export_vurl) {
 //
 
 // fill Export service's vURL as options.export
-var srv = new Proxy({export: export_vurl, usrkey: usrkey}, function(err, proxy){
+var srv = new Proxy({export: export_vurl, usrkey: usrkey, secmode: secmode}, function(err, proxy){
     if (err || !proxy) {
         console.log(err+',create proxy failed');
         return 

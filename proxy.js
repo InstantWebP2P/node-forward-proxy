@@ -1,4 +1,4 @@
-// Copyright (c) 2013 Tom Zhou
+// Copyright (c) 2013 Tom Zhou<iwebpp@gmail.com>
 
 var WEBPP = require('iwebpp.io'),
     SEP = WEBPP.SEP,
@@ -74,7 +74,7 @@ var Proxy = module.exports = function(options, fn){
 	
 	// 2.
 	// check ready
-	nmcln.on('ready', function(){      	    	    
+	nmcln.once('ready', function(){      	    	    
 	    // 3.
 	    // export http proxy
 	    // TBD... admin portal page
