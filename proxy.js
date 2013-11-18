@@ -28,6 +28,7 @@ var debug = 0;
 // - options: user custom parameters, like {secmode: ..., usrkey: ..., domain: ..., endpoints: ..., turn: ...}
 // - options.secmode: ssl, enable ssl/https; acl, enable ssl/https,host-based ACL
 // - options.export: Forward-proxy's Export service vURL
+// - options.access_local: Enable local access on Export host, 1: enable, 0: disable, default disable it
 // -      fn: callback to pass proxy informations
 var Proxy = module.exports = function(options, fn){ 
     var self = this;
@@ -38,6 +39,9 @@ var Proxy = module.exports = function(options, fn){
         fn = options;
         options = {};
     }
+    
+    // check arguments
+    self.access_local = options.access_local || 0;
         
     // 0.
     // export proxy cache
@@ -97,6 +101,13 @@ var Proxy = module.exports = function(options, fn){
 	            var urls    = URL.parse('http://'+req.url, true, true);
 	            var srvip   = urls.hostname;
 	            var srvport = urls.port || 443;
+	            
+	            // check if access to export local host
+	            if ((self.access_local === 0) && isLocalhost(srvip)) {
+                    console.log("http tunnel proxy to " + req.url + ", deny local access on export host");
+                    socket.end();
+                    return;
+	            }
 	            
                 if (debug) console.log('http tunnel proxy, connect to %s:%d', srvip, srvport);
                 var srvSocket = NET.connect(srvport, srvip, function() {
