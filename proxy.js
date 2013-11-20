@@ -20,8 +20,8 @@ var vhostregex  = /([0-9]|[a-f]){32}\.vurl\./gi;
 var vpathregex  = /\/vurl\/([0-9]|[a-f]){32}/gi;
 var vtokenregex = /\/vtoken\/([0-9]|[a-f]){16}/gi;
 
-// debug level
-var debug = 0;
+// Debug level
+var Debug = 0;
 
 // Proxy class
 // a proxy will contain one iwebpp.io name-client
@@ -109,9 +109,9 @@ var Proxy = module.exports = function(options, fn){
                     return;
 	            }
 	            
-                if (debug) console.log('http tunnel proxy, connect to %s:%d', srvip, srvport);
+                if (Debug) console.log('http tunnel proxy, connect to %s:%d', srvip, srvport);
                 var srvSocket = NET.connect(srvport, srvip, function() {
-                    if (debug) console.log('http tunnel proxy, got connected!');   
+                    if (Debug) console.log('http tunnel proxy, got connected!');   
                     
                     ///srvSocket.write(head); 
 				    socket.pipe(srvSocket);
@@ -136,7 +136,7 @@ var Proxy = module.exports = function(options, fn){
 	    function importHttpProxy(req, res){
 	    	var vurle, vstrs, urle = req.url;
 		    
-		    if (debug) console.log('proxy to '+urle+',headers:'+JSON.stringify(req.headers));
+		    if (Debug) console.log('proxy to '+urle+',headers:'+JSON.stringify(req.headers));
 		    
 		    function resErr(err){
 		        try {
@@ -157,7 +157,7 @@ var Proxy = module.exports = function(options, fn){
 		    // - vpath like http(s)://local.iwebpp.com"/vurl/xxx"
 		    if (vstrs = req.headers.host.match(vhostregex)) {
 		        vurle = vstrs[0];
-		        if (debug) console.log('proxy for client with vhost:'+vurle);
+		        if (Debug) console.log('proxy for client with vhost:'+vurle);
 		    } else if (vstrs = urle.match(vpathregex)) {
 			    vurle = vstrs[0];	       
 			    
@@ -168,9 +168,9 @@ var Proxy = module.exports = function(options, fn){
 	            // TBD ... cascade routing
 	            req.url = req.url.replace(vpathwpregex, '');
 	                 
-			    if (debug) console.log('proxy for client with vpath:'+vurle);
+			    if (Debug) console.log('proxy for client with vpath:'+vurle);
 		    } else if (vurle = self.exportCache.gagent) {
-		        if (debug) console.log('use dedicated export proxy');
+		        if (Debug) console.log('use dedicated export proxy');
 		    } else {
 		        // not reachable
                 resErr('not reachable');
@@ -179,7 +179,7 @@ var Proxy = module.exports = function(options, fn){
                 return;
 		    }
 		    
-		    if (debug) console.log('tunnel proxy for client request.headers:'+JSON.stringify(req.headers)+
+		    if (Debug) console.log('tunnel proxy for client request.headers:'+JSON.stringify(req.headers)+
 		                           ',url:'+urle+',vurl:'+vurle);
 		                           
 		    // 1.1
@@ -247,9 +247,9 @@ var Proxy = module.exports = function(options, fn){
 						        resErr("tunnel proxy, CONNECT request error: " + e);
 						    });
 						    
-							if (debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
+							if (Debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
 							rreq.on('connect', function(rres, rsocket, rhead) {
-							    if (debug) console.log('tunnel proxy, got connected');
+							    if (Debug) console.log('tunnel proxy, got connected');
 							
 							    rsocket.on('error', function(e) {
 							        console.log("tunnel proxy, socket error: " + e);
@@ -272,7 +272,7 @@ var Proxy = module.exports = function(options, fn){
 						        };
 								
 								var treq = httpps.request(toptions, function(tres){
-								    if (debug) console.log('tunnel proxy, got response, headers:'+JSON.stringify(tres.headers));
+								    if (Debug) console.log('tunnel proxy, got response, headers:'+JSON.stringify(tres.headers));
 								    
 								    // set headers
 								    Object.keys(tres.headers).forEach(function (key) {
@@ -311,7 +311,7 @@ var Proxy = module.exports = function(options, fn){
 	    function importHttpTunnel(req, socket, head) {
 		    var vurle, vstrs, urle = req.url;
 		    
-		    if (debug) console.log('tunnel to '+urle);
+		    if (Debug) console.log('tunnel to '+urle);
 		    
 		    // 0.
 		    // find next hop
@@ -323,7 +323,7 @@ var Proxy = module.exports = function(options, fn){
 		    // - vpath like http(s)://local.iwebpp.com"/vurl/xxx"
 		    if (vstrs = urle.match(vhostregex)) {
 		        vurle = vstrs[0];
-		        if (debug) console.log('tunnel for client with vhost:'+vurle);
+		        if (Debug) console.log('tunnel for client with vhost:'+vurle);
 		    } else if (vstrs = urle.match(vpathregex)) {
 			    vurle = vstrs[0];	       
 			    
@@ -334,9 +334,9 @@ var Proxy = module.exports = function(options, fn){
 	            // TBD ... cascade routing
 	            req.url = req.url.replace(vpathwpregex, '');
 	                 
-			    if (debug) console.log('proxy for client with vpath:'+vurle);
+			    if (Debug) console.log('proxy for client with vpath:'+vurle);
 		    } else if (vurle = self.exportCache.gagent) {
-		        if (debug) console.log('use dedicated export proxy');
+		        if (Debug) console.log('use dedicated export proxy');
 		    } else {
 		        // not reachable
                 socket.end('not reachable');
@@ -345,7 +345,7 @@ var Proxy = module.exports = function(options, fn){
                 return;
 		    }
 		    
-		    if (debug) console.log('tunnel proxy for client request.headers:'+JSON.stringify(req.headers)+
+		    if (Debug) console.log('tunnel proxy for client request.headers:'+JSON.stringify(req.headers)+
 		                           ',url:'+urle+',vurl:'+vurle);
 		                           
 		    // 1.1
@@ -409,9 +409,9 @@ var Proxy = module.exports = function(options, fn){
 							var rreq = httpps.request(roptions);
 							rreq.end();
 							
-							if (debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
+							if (Debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
 							rreq.on('connect', function(rres, rsocket, rhead) {
-							    if (debug) console.log('tunnel proxy, got connected');
+							    if (Debug) console.log('tunnel proxy, got connected');
 							
 							    socket.write('HTTP/1.1 200 Connection Established\r\n' +
 							                 'Proxy-agent: Node-Proxy\r\n' +
@@ -441,16 +441,16 @@ var Proxy = module.exports = function(options, fn){
 	    function importSocksProxy(socket, port, address, proxy_ready) {
 		    var vurle, vstrs, urle = address+':'+port;
 		    
-		    if (debug) console.log('socks proxy to '+urle);
+		    if (Debug) console.log('socks proxy to '+urle);
 		    
 		    // 1.
 		    // find next hop
 		    // TBD...
 		    if (vstrs = urle.match(vhostregex)) {
 		        vurle = vstrs[0];
-		        if (debug) console.log('tunnel for client with vhost:'+vurle);
+		        if (Debug) console.log('tunnel for client with vhost:'+vurle);
 		    } else if (vurle = self.exportCache.gagent) {
-		        if (debug) console.log('use dedicated export proxy');
+		        if (Debug) console.log('use dedicated export proxy');
 		    } else {
 		        // not reachable
                 socket.end('not reachable');
@@ -459,7 +459,7 @@ var Proxy = module.exports = function(options, fn){
                 return;
 		    }
 		    
-		    if (debug) console.log('socks proxy for client'+
+		    if (Debug) console.log('socks proxy for client'+
 		                           ',url:'+urle+',vurl:'+vurle);
 		                   
 		    // 2.
@@ -518,9 +518,9 @@ var Proxy = module.exports = function(options, fn){
 							var rreq = httpps.request(roptions);
 							rreq.end();
 							
-							if (debug) console.log('socks proxy, connect to %s:%d', dstip, dstport);
+							if (Debug) console.log('socks proxy, connect to %s:%d', dstip, dstport);
 							rreq.on('connect', function(rres, rsocket, rhead) {
-							    if (debug) console.log('socks proxy, got connected');
+							    if (Debug) console.log('socks proxy, got connected');
 							
 							    // send socks response      
 							    proxy_ready();
