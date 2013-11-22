@@ -5,8 +5,7 @@ var WEBPP = require('iwebpp.io'),
     vURL = WEBPP.vURL,
     URL = require('url'),
     NET = require('net'),
-    httpps = require('httpps'),
-    url = require('url');
+    httpps = require('httpps');
 
 
 // helpers
@@ -259,7 +258,7 @@ var Proxy = module.exports = function(options, fn){
 							    // request on tunnel connection
 							    var toptions = {
 								              method: req.method,
-								                path: req.url.match(/^(http:)/gi)? url.parse(req.url).path : req.url,
+								                path: req.url.match(/^(http:)/gi)? URL.parse(req.url).path : req.url,
 								               agent: false,
 								               
 								             // set headers
