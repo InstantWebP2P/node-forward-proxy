@@ -238,7 +238,13 @@ var Proxy = module.exports = function(options, fn){
 			                        }
 			                    }
 					        };
-							
+					        // set SSL related options
+						    if (nmcln.secmode && nmcln.secerts) {
+						        Object.keys(nmcln.secerts).forEach(function(k){
+						            roptions[k] = nmcln.secerts[k];  
+						        });
+						    }
+						    							
 							var rreq = httpps.request(roptions);
 							rreq.end();
 							rreq.on('error', function(e) {
@@ -404,7 +410,13 @@ var Proxy = module.exports = function(options, fn){
 			                        }
 			                    }
 					        };
-							
+					        // set SSL related options
+						    if (nmcln.secmode && nmcln.secerts) {
+						        Object.keys(nmcln.secerts).forEach(function(k){
+						            roptions[k] = nmcln.secerts[k];  
+						        });
+						    }
+						    							
 							var rreq = httpps.request(roptions);
 							rreq.end();
 							
@@ -513,6 +525,12 @@ var Proxy = module.exports = function(options, fn){
 			                        }
 			                    }
 					        };
+					        // set SSL related options
+						    if (nmcln.secmode && nmcln.secerts) {
+						        Object.keys(nmcln.secerts).forEach(function(k){
+						            roptions[k] = nmcln.secerts[k];  
+						        });
+						    }
 							
 							var rreq = httpps.request(roptions);
 							rreq.end();
