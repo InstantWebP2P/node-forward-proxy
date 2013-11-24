@@ -94,7 +94,7 @@ var srv = new Proxy({export: export_vurl, usrkey: usrkey,
 	    pxySrv.on('request', importApp.httpApp.proxy);
 	    pxySrv.on('connect', importApp.httpApp.tunnel);
 	    
-	    pxySrv.listen(http_port, '0.0.0.0', 50);
+	    pxySrv.listen(http_port, 50);
 	    
 	    console.log('Http forwar proxy server listen on port '+http_port);
     }
