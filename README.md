@@ -1,7 +1,7 @@
 node-forward-proxy
 ===============
 
-p2p http forward and socks proxy based on iWebPP.io and Node.js
+p2p http and socks forward proxy based on iWebPP.io and Node.js
 
 ### Features
 
