@@ -14,11 +14,6 @@ function isLocalhost(host){
             (host === '0:0:0:0:0:0:0:1') || (host === '::1'));
 }
 
-var vurleregex  = /([0-9]|[a-f]){32}/gi;
-var vhostregex  = /([0-9]|[a-f]){32}\.vurl\./gi;
-var vpathregex  = /\/vurl\/([0-9]|[a-f]){32}/gi;
-var vtokenregex = /\/vtoken\/([0-9]|[a-f]){16}/gi;
-
 // Debug level
 var Debug = 0;
 
@@ -154,10 +149,10 @@ var Proxy = module.exports = function(options, fn){
 		    // match vURL pattern:
 		    // - vhost like http(s)://"xxx.vurl."vlocal.peerwww.net
 		    // - vpath like http(s)://vlocal.peerwww.net"/vurl/xxx"
-		    if (vstrs = req.headers.host.match(vhostregex)) {
+		    if (vstrs = req.headers.host.match(vURL.regex_vhost)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('proxy for client with vhost:'+vurle);
-		    } else if (vstrs = urle.match(vpathregex)) {
+		    } else if (vstrs = urle.match(vURL.regex_vpath)) {
 			    vurle = vstrs[0];	       
 			    
 			    // prune vpath in req.url
@@ -184,7 +179,7 @@ var Proxy = module.exports = function(options, fn){
 		    // 1.1
 	        // !!! rewrite req.url to remove vToken parts
 	        // TBD ... vToken check
-	        req.url = req.url.replace(vtokenregex, '');                      
+	        req.url = req.url.replace(vURL.regex_vtoken, '');                      
 		    
 		    // 2.
 			// get peer info by vURL
@@ -326,10 +321,10 @@ var Proxy = module.exports = function(options, fn){
 		    // match vURL pattern:
 		    // - vhost like http(s)://"xxx.vurl."vlocal.peerwww.net
 		    // - vpath like http(s)://vlocal.peerwww.net"/vurl/xxx"
-		    if (vstrs = urle.match(vhostregex)) {
+		    if (vstrs = urle.match(vURL.regex_vhost)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('tunnel for client with vhost:'+vurle);
-		    } else if (vstrs = urle.match(vpathregex)) {
+		    } else if (vstrs = urle.match(vURL.regex_vpath)) {
 			    vurle = vstrs[0];	       
 			    
 			    // prune vpath in req.url
@@ -356,7 +351,7 @@ var Proxy = module.exports = function(options, fn){
 		    // 1.1
 	        // !!! rewrite req.url to remove vToken parts
 	        // TBD ... vToken check
-	        req.url = req.url.replace(vtokenregex, '');                      
+	        req.url = req.url.replace(vURL.regex_vtoken, '');                      
 		    
 		    // 2.
 			// get peer info by vURL
@@ -457,7 +452,7 @@ var Proxy = module.exports = function(options, fn){
 		    // 1.
 		    // find next hop
 		    // TBD...
-		    if (vstrs = urle.match(vhostregex)) {
+		    if (vstrs = urle.match(vURL.regex_vhost)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('tunnel for client with vhost:'+vurle);
 		    } else if (vurle = self.exportCache.gagent) {
