@@ -60,11 +60,11 @@ var Proxy = module.exports = function(options, fn){
         srvinfo: {
             timeout: 20,
             endpoints: (options && options.endpoints) || [
-                {ip: 'iwebpp.com', port: 51686},
-                {ip: 'iwebpp.com', port: 51868}
+                {ip: 'peerwww.net', port: 51686},
+                {ip: 'peerwww.net', port: 51868}
             ],
             turn: (options && options.turn) || [
-                {ip: 'iwebpp.com', agent: 51866, proxy: 51688}
+                {ip: 'peerwww.net', agent: 51866, proxy: 51688}
             ]
         },
         
@@ -152,8 +152,8 @@ var Proxy = module.exports = function(options, fn){
 		    		    
 		    // 1.
 		    // match vURL pattern:
-		    // - vhost like http(s)://"xxx.vurl."local.iwebpp.com
-		    // - vpath like http(s)://local.iwebpp.com"/vurl/xxx"
+		    // - vhost like http(s)://"xxx.vurl."local.peerwww.net
+		    // - vpath like http(s)://local.peerwww.net"/vurl/xxx"
 		    if (vstrs = req.headers.host.match(vhostregex)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('proxy for client with vhost:'+vurle);
@@ -324,8 +324,8 @@ var Proxy = module.exports = function(options, fn){
 		    
 		    // 1.
 		    // match vURL pattern:
-		    // - vhost like http(s)://"xxx.vurl."local.iwebpp.com
-		    // - vpath like http(s)://local.iwebpp.com"/vurl/xxx"
+		    // - vhost like http(s)://"xxx.vurl."local.peerwww.net
+		    // - vpath like http(s)://local.peerwww.net"/vurl/xxx"
 		    if (vstrs = urle.match(vhostregex)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('tunnel for client with vhost:'+vurle);
