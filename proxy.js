@@ -152,8 +152,8 @@ var Proxy = module.exports = function(options, fn){
 		    		    
 		    // 1.
 		    // match vURL pattern:
-		    // - vhost like http(s)://"xxx.vurl."local.peerwww.net
-		    // - vpath like http(s)://local.peerwww.net"/vurl/xxx"
+		    // - vhost like http(s)://"xxx.vurl."vlocal.peerwww.net
+		    // - vpath like http(s)://vlocal.peerwww.net"/vurl/xxx"
 		    if (vstrs = req.headers.host.match(vhostregex)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('proxy for client with vhost:'+vurle);
@@ -163,7 +163,7 @@ var Proxy = module.exports = function(options, fn){
 			    // prune vpath in req.url
 	            req.url = req.url.replace(vurle, '');
 			    
-			    // prune /local/wxxxp path
+			    // prune /vlocal/wxxxp path
 	            // TBD ... cascade routing
 	            req.url = req.url.replace(vpathwpregex, '');
 	                 
@@ -324,8 +324,8 @@ var Proxy = module.exports = function(options, fn){
 		    
 		    // 1.
 		    // match vURL pattern:
-		    // - vhost like http(s)://"xxx.vurl."local.peerwww.net
-		    // - vpath like http(s)://local.peerwww.net"/vurl/xxx"
+		    // - vhost like http(s)://"xxx.vurl."vlocal.peerwww.net
+		    // - vpath like http(s)://vlocal.peerwww.net"/vurl/xxx"
 		    if (vstrs = urle.match(vhostregex)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('tunnel for client with vhost:'+vurle);
@@ -335,7 +335,7 @@ var Proxy = module.exports = function(options, fn){
 			    // prune vpath in req.url
 	            req.url = req.url.replace(vurle, '');
 			    
-			    // prune /local/wxxxp path
+			    // prune /vlocal/wxxxp path
 	            // TBD ... cascade routing
 	            req.url = req.url.replace(vpathwpregex, '');
 	                 
