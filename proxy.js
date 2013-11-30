@@ -15,7 +15,7 @@ function isLocalhost(host){
 }
 
 // Debug level
-var Debug = 0;
+var Debug = 1;
 
 // Proxy class
 // a proxy will contain one iwebpp.io name-client
@@ -645,7 +645,7 @@ Proxy.prototype.queryExport = function(fn){
             // 2.
             // cache it
             Object.keys(srv).forEach(function(k){
-                if (srv[k]) {
+                if (srv[k] && !(k in self.exportCache)) {
                     self.exportCache[k] = srv[k];
                 }
             });
