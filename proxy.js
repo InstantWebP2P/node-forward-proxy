@@ -147,8 +147,8 @@ var Proxy = module.exports = function(options, fn){
 		    		    
 		    // 1.
 		    // match vURL pattern:
-		    // - vhost like http(s)://"xxx.vurl."vlocal.iwebpp.com
-		    // - vpath like http(s)://vlocal.iwebpp.com"/vurl/xxx"
+		    // - vhost like http(s)://xxx.vurl.iwebpp.com
+		    // - vpath like http(s)://iwebpp.com"/vurl/xxx"
 		    if (vstrs = req.headers.host.match(vURL.regex_vhost)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('proxy for client with vhost:'+vurle);
@@ -157,11 +157,7 @@ var Proxy = module.exports = function(options, fn){
 			    
 			    // prune vpath in req.url
 	            req.url = req.url.replace(vurle, '');
-			    
-			    // prune /vlocal/wxxxp path
-	            // TBD ... cascade routing
-	            req.url = req.url.replace(vpathwpregex, '');
-	                 
+	            
 			    if (Debug) console.log('proxy for client with vpath:'+vurle);
 		    } else if (vurle = self.exportCache.gagent) {
 		        if (Debug) console.log('use dedicated export proxy');
@@ -319,8 +315,8 @@ var Proxy = module.exports = function(options, fn){
 		    
 		    // 1.
 		    // match vURL pattern:
-		    // - vhost like http(s)://"xxx.vurl."vlocal.iwebpp.com
-		    // - vpath like http(s)://vlocal.iwebpp.com"/vurl/xxx"
+		    // - vhost like http(s)://xxx.vurl.iwebpp.com
+		    // - vpath like http(s)://iwebpp.com/vurl/xxx"
 		    if (vstrs = urle.match(vURL.regex_vhost)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('tunnel for client with vhost:'+vurle);
@@ -329,10 +325,6 @@ var Proxy = module.exports = function(options, fn){
 			    
 			    // prune vpath in req.url
 	            req.url = req.url.replace(vurle, '');
-			    
-			    // prune /vlocal/wxxxp path
-	            // TBD ... cascade routing
-	            req.url = req.url.replace(vpathwpregex, '');
 	                 
 			    if (Debug) console.log('proxy for client with vpath:'+vurle);
 		    } else if (vurle = self.exportCache.gagent) {
