@@ -194,8 +194,11 @@ var Proxy = module.exports = function(options, fn){
                     if (self.exportCache[vurle]) {
                         self.exportCache[vurle] = null;
                     }
-		                                    
-	                return;
+                    
+                    // update export service live flag as false
+                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
+                        if (err) console.log('update service live flag as false failed');
+                    });
 		        } else {
 			        // 3.
 			        // get peer endpoint
@@ -222,6 +225,11 @@ var Proxy = module.exports = function(options, fn){
 		                    if (self.exportCache[vurle]) {
 		                        self.exportCache[vurle] = null;
 		                    }
+		                    
+		                    // update export service live flag as false
+		                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
+		                        if (err) console.log('update service live flag as false failed');
+		                    });          
 			            } else {
 			                // 6.
 						    // setup tunnel to target by make CONNECT request
@@ -373,7 +381,10 @@ var Proxy = module.exports = function(options, fn){
                         self.exportCache[vurle] = null;
                     }	           
                                          
-	                return;
+                    // update export service live flag as false
+                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
+                        if (err) console.log('update service live flag as false failed');
+                    });
 		        } else {
 			        // 3.
 			        // get peer endpoint
@@ -400,6 +411,11 @@ var Proxy = module.exports = function(options, fn){
 		                    if (self.exportCache[vurle]) {
 		                        self.exportCache[vurle] = null;
 		                    }
+		                    
+                            // update export service live flag as false
+		                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
+		                        if (err) console.log('update service live flag as false failed');
+		                    });		                    
 			            } else {
 			                // 6.
 						    // setup tunnel to target by make CONNECT request
@@ -498,7 +514,10 @@ var Proxy = module.exports = function(options, fn){
                         self.exportCache[vurle] = null;
                     }
                     	                                
-	                return;
+                    // update export service live flag as false
+                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
+                        if (err) console.log('update service live flag as false failed');
+                    });
 		        } else {
 			        // 3.
 			        // get peer endpoint
@@ -525,6 +544,11 @@ var Proxy = module.exports = function(options, fn){
 		                    if (self.exportCache[vurle]) {
 		                        self.exportCache[vurle] = null;
 		                    }
+		                    
+                            // update export service live flag as false
+		                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
+		                        if (err) console.log('update service live flag as false failed');
+		                    });		                    
 			            } else {
 			                // 6.
 						    // setup tunnel to target by make CONNECT request
@@ -626,7 +650,7 @@ Proxy.prototype.findExport = function(host, url){
     }
 };
 
-// Query export service and cache it
+// Query Live export service and cache it
 Proxy.prototype.queryExport = function(fn){
     var self = this;
     
@@ -634,8 +658,8 @@ Proxy.prototype.queryExport = function(fn){
     self.exportCache = self.exportCache || {};
     
     // 1.
-    // query forward-proxy-export service
-    self.nmcln.queryService({cate: 'forward-proxy-export'}, function(err, srv){
+    // query live forward-proxy-export service
+    self.nmcln.queryService({cate: 'forward-proxy-export', live: true}, function(err, srv){
         if (err || !srv) {
             console.log('No available export services '+err);
             if (fn) fn('No available export services');
