@@ -41,8 +41,11 @@ var Proxy = module.exports = function(options, fn){
     // export proxy cache
     self.exportCache = {};
     
-    // fill dedicated export proxy
-    self.exportCache.gagent = options && options.export;
+    // 0.1
+    // fill dedicated export service vURL
+    if (options && options.export) {
+        self.exportCache[options.export] = {vurl: options.export};
+    }
 
     // 1.
     // create name client
@@ -159,8 +162,8 @@ var Proxy = module.exports = function(options, fn){
 	            req.url = req.url.replace(vurle, '');
 	            
 			    if (Debug) console.log('proxy for client with vpath:'+vurle);
-		    } else if (vurle = self.exportCache.gagent) {
-		        if (Debug) console.log('use dedicated export proxy');
+		    } else if (vurle = self.findExport(req.headers.host, urle)) {
+		        if (Debug) console.log('use export proxy '+vurle);
 		    } else {
 		        // not reachable
                 resErr('not reachable');
@@ -186,7 +189,12 @@ var Proxy = module.exports = function(options, fn){
 		            // invalid vURL
 	                resErr('invalid URL');
 	                console.error('invalid URL:'+urle);
-	                                
+	                
+            		// clear export cache
+                    if (self.exportCache[vurle]) {
+                        self.exportCache[vurle] = null;
+                    }
+		                                    
 	                return;
 		        } else {
 			        // 3.
@@ -209,6 +217,11 @@ var Proxy = module.exports = function(options, fn){
 				            // STUN not availabe
 		                    resErr('STUN not available, please use TURN');
 		                    console.error('STUN not available:'+urle);
+		                    
+		                    // clear export cache
+		                    if (self.exportCache[vurle]) {
+		                        self.exportCache[vurle] = null;
+		                    }
 			            } else {
 			                // 6.
 						    // setup tunnel to target by make CONNECT request
@@ -327,8 +340,8 @@ var Proxy = module.exports = function(options, fn){
 	            req.url = req.url.replace(vurle, '');
 	                 
 			    if (Debug) console.log('proxy for client with vpath:'+vurle);
-		    } else if (vurle = self.exportCache.gagent) {
-		        if (Debug) console.log('use dedicated export proxy');
+		    } else if (vurle = self.findExport(urle, urle)) {
+		        if (Debug) console.log('use export proxy '+vurle);
 		    } else {
 		        // not reachable
                 socket.end('not reachable');
@@ -354,7 +367,12 @@ var Proxy = module.exports = function(options, fn){
 		            // invalid vURL
 	                socket.end('invalid URL');
 	                console.error('invalid URL:'+urle);
-	                                
+	                
+            		// clear export cache
+                    if (self.exportCache[vurle]) {
+                        self.exportCache[vurle] = null;
+                    }	           
+                                         
 	                return;
 		        } else {
 			        // 3.
@@ -377,6 +395,11 @@ var Proxy = module.exports = function(options, fn){
 				            // STUN not availabe
 		                    socket.end('STUN not available, please use TURN');
 		                    console.error('STUN not available:'+urle);
+		                    
+		                    // clear export cache
+		                    if (self.exportCache[vurle]) {
+		                        self.exportCache[vurle] = null;
+		                    }
 			            } else {
 			                // 6.
 						    // setup tunnel to target by make CONNECT request
@@ -447,8 +470,8 @@ var Proxy = module.exports = function(options, fn){
 		    if (vstrs = urle.match(vURL.regex_vhost)) {
 		        vurle = vstrs[0];
 		        if (Debug) console.log('tunnel for client with vhost:'+vurle);
-		    } else if (vurle = self.exportCache.gagent) {
-		        if (Debug) console.log('use dedicated export proxy');
+		    } else if (vurle = self.findExport(urle, urle)) {
+		        if (Debug) console.log('use export proxy '+vurle);
 		    } else {
 		        // not reachable
                 socket.end('not reachable');
@@ -469,7 +492,12 @@ var Proxy = module.exports = function(options, fn){
 		            // invalid vURL
 	                socket.end('invalid URL');
 	                console.error('invalid URL:'+urle);
-	                                
+	                
+            		// clear export cache
+                    if (self.exportCache[vurle]) {
+                        self.exportCache[vurle] = null;
+                    }
+                    	                                
 	                return;
 		        } else {
 			        // 3.
@@ -492,6 +520,11 @@ var Proxy = module.exports = function(options, fn){
 				            // STUN not availabe
 		                    socket.end('STUN not available, please use TURN');
 		                    console.error('STUN not available:'+urle);
+		                    
+		                    // clear export cache
+		                    if (self.exportCache[vurle]) {
+		                        self.exportCache[vurle] = null;
+		                    }
 			            } else {
 			                // 6.
 						    // setup tunnel to target by make CONNECT request
@@ -547,19 +580,6 @@ var Proxy = module.exports = function(options, fn){
 		        }
 	        });
 	    }
-	    
-    	// 6.
-        // report peer-service
-        // like {vurl:x,cate:x,name:x,desc:x,tags:x,acls:x,accounting:x,meta:x}
-        nmcln.reportService({
-            vurl: nmcln.vurl,
-            cate: 'forward-proxy',
-            name: 'forward-proxy'
-        });
-        
-        // 6.1
-        // update peer-service: connetion loss, etc
-        // TBD...
         
         // 8.
 	    // pass forward proxy App
@@ -572,8 +592,91 @@ var Proxy = module.exports = function(options, fn){
 	// 1.2
 	// check error
 	nmcln.on('error', function(err){
+	    // 1.2.1
+	    // clear export service query timer
+	    if (self.qsInterval) {
+            clearInterval(self.qsInterval);
+            self.qsInterval = null;
+        }
+	    
 	    console.log('name-client create failed:'+JSON.stringify(err));
 	    fn(err);
 	});
 };
 
+// Choose an export service vURL
+// TBD... geoip based algorithm for host/url
+Proxy.prototype.findExport = function(host, url){
+    var self = this;
+    var rndm = Date.now();
+    var vkey = [];
+    
+    // screen valid export 
+    Object.keys(self.exportCache).forEach(function(k){
+        if (self.exportCache[k]) vkey.push(k);
+    });
+    if (Debug) console.log('vkey: '+JSON.stringify(vkey));
+    
+    // choose one
+    if (vkey && vkey.length) {
+        ///console.log(rndm % vkey.length);
+        return self.exportCache[vkey[rndm % vkey.length]].vurl;
+    } else { 
+        return null;
+    }
+};
+
+// Query export service and cache it
+Proxy.prototype.queryExport = function(fn){
+    var self = this;
+    
+    // export service cache
+    self.exportCache = self.exportCache || {};
+    
+    // 1.
+    // query forward-proxy-export service
+    self.nmcln.queryService({cate: 'forward-proxy-export'}, function(err, srv){
+        if (err || !srv) {
+            console.log('No available export services '+err);
+            if (fn) fn('No available export services');
+        } else {
+            if (Debug) console.log('available export services: '+JSON.stringify(srv));
+            
+            // 2.
+            // cache it
+            Object.keys(srv).forEach(function(k){
+                if (srv[k]) {
+                    self.exportCache[k] = srv[k];
+                }
+            });
+            
+            if (fn) fn(null, srv);
+        }
+    });
+    
+    return self;
+};
+
+// Turn on/off export service query timer
+// - on: true or false
+// - timeout: optional, default is 6mins
+Proxy.prototype.turnQuerytimer = function(on, timeout){
+    var self = this;
+    
+    if (on && !self.qsInterval) {
+        if (Debug) console.log('turn on export service query timemout '+timeout);
+        
+        self.qsInterval = setInterval(function(){
+            self.queryExport();
+        }, timeout || 360000);
+    } else {
+        if (self.qsInterval) {
+            if (Debug) console.log('turn off export service query timer');
+            
+            clearInterval(self.qsInterval);
+            self.qsInterval = null;
+        }
+    }
+    
+    return self;
+};

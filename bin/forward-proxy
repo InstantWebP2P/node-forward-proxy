@@ -16,6 +16,7 @@ var help = [
     "      --http_port     51866            Http proxy port, Optional",
     "      --socks_port    51888            Socks proxy port, Optional",
     "      --export_vurl   URL              Export service's vURL, Optional",
+    "      --turnon_timer  1 or 0           Turn on export service query timer, Optional",
     "      --enable_export 1 or 0           Turn on export service, Optional",
     "      --access_local  1 or 0           Local access on Export host, 1: allow, 0: deny, default deny it",
     "  -k, --key           User key         Key for the registered user, MUST",
@@ -32,6 +33,7 @@ var http_port = argv.http_port,
     socks_port =  argv.socks_port,
     export_vurl = argv.export_vurl,
     enable_export = argv.enable || argv.enable_export,
+    turnon_timer = argv.turnon || argv.turnon_timer,
     access_local = argv.access || argv.access_local,
     secmode = argv.s || argv.secmode,
     user = argv.u || argv.user,
@@ -44,67 +46,87 @@ if (!(http_port || socks_port) && !enable_export) {
     http_port = 51866;
     socks_port = 51888;
 }
-if ((http_port || socks_port) && !export_vurl) {
-    util.puts('Please pass Export service vURL by --export_vurl xxx');
-    return util.puts(help);
-}
 
 //
 // Create the server with the specified options
 //
 
 // fill Export service's vURL as options.export
-var srv = new Proxy({export: export_vurl, usrkey: usrkey, 
+var prxy = new Proxy({export: export_vurl, usrkey: usrkey, 
                      secmode: secmode, access_local: access_local}, function(err, proxy){
     if (err || !proxy) {
         console.log(err+',create proxy failed');
         return 
     }
-    var nmcln = srv.nmcln;
+    var nmcln = prxy.nmcln;
     var importApp = proxy.importApp;
     var exportApp = proxy.exportApp;
 
-    // start socks proxy service
-    if (socks_port) {
-	    var socks = require('socks5');
-	    var sockspxySrv = socks.createServer(importApp.socksApp);
-	    
-	    sockspxySrv.listen(socks_port, 50);
-	    
-	    sockspxySrv.on('error', function (e) {
-	        console.error('SERVER ERROR: %j', e);
-		    if (e.code == 'EADDRINUSE') {
-		        console.log('Address in use, retrying in 10 seconds...');
-		        setTimeout(function () {
-		            console.log('Reconnecting to %s:%s', HOST, PORT);
-		            sockspxySrv.close();
-		            sockspxySrv.listen(socks_port, 50);
-		        }, 10000);
-		    }
-	    });
-	    
-	    console.log('Socks forward proxy server listen on port '+socks_port);
+    // Import service ...
+    if (socks_port || http_port) {
+        // query available export service firstly
+        prxy.queryExport(function(err, srv){
+            if (err || !srv) {
+                console.log('No available export service, please run export service in advance');
+            } else {
+                ///console.log('Available export services: '+JSON.stringify(srv));
+                
+                // start socks proxy service
+			    if (socks_port) {
+				    var socks = require('socks5');
+				    var sockspxySrv = socks.createServer(importApp.socksApp);
+				    
+				    sockspxySrv.listen(socks_port, 50);
+				    
+				    sockspxySrv.on('error', function (e) {
+				        console.error('SERVER ERROR: %j', e);
+					    if (e.code == 'EADDRINUSE') {
+					        console.log('Address in use, retrying in 10 seconds...');
+					        setTimeout(function () {
+					            console.log('Reconnecting to %s:%s', HOST, PORT);
+					            sockspxySrv.close();
+					            sockspxySrv.listen(socks_port, 50);
+					        }, 10000);
+					    }
+				    });
+				    
+				    console.log('Socks forward proxy server listen on port '+socks_port);
+			    }
+			    
+			    // start http proxy service
+			    if (http_port) {
+				    var http = require('http');
+				    var pxySrv = http.createServer();
+				    
+				    pxySrv.on('request', importApp.httpApp.proxy);
+				    pxySrv.on('connect', importApp.httpApp.tunnel);
+				    
+				    pxySrv.listen(http_port, 50);
+				    
+				    console.log('Http forwar proxy server listen on port '+http_port);
+			    }
+			    
+			    // turn on export service query timer
+			    if (turnon_timer) prxy.turnQuerytimer(true);
+            }
+        });
     }
     
-    // start http proxy service
-    if (http_port) {
-	    var http = require('http');
-	    var pxySrv = http.createServer();
-	    
-	    pxySrv.on('request', importApp.httpApp.proxy);
-	    pxySrv.on('connect', importApp.httpApp.tunnel);
-	    
-	    pxySrv.listen(http_port, 50);
-	    
-	    console.log('Http forwar proxy server listen on port '+http_port);
-    }
-    
+    // Export service ...
     // start export service on name-client
     if (enable_export) {
 	    nmcln.bsrv.srv.on('request', exportApp.httpApp.proxy);
 	    nmcln.bsrv.srv.on('connect', exportApp.httpApp.tunnel);
 	        
 	    console.log('Export service ready on vURL: '+nmcln.vurl+'\nUsrkey: '+nmcln.usrinfo.usrkey);
+	    
+        // report peer-service
+        // like {vurl:x,cate:x,name:x,desc:x,tags:x,acls:x,accounting:x,meta:x}
+        nmcln.reportService({
+            vurl: nmcln.vurl,
+            cate: 'forward-proxy-export',
+            name: 'forward-proxy'
+        });
     }
 });
 
