@@ -1,1 +1,1 @@
-edit PAC file to include httpp-enabled website, then send a pull request
+edit proxy rules in black.pac or white.pack
