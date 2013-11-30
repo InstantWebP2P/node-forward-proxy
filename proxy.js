@@ -15,7 +15,7 @@ function isLocalhost(host){
 }
 
 // Debug level
-var Debug = 1;
+var Debug = 0;
 
 // Proxy class
 // a proxy will contain one iwebpp.io name-client
