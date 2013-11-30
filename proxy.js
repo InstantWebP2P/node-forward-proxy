@@ -5,13 +5,27 @@ var WEBPP = require('iwebpp.io'),
     vURL = WEBPP.vURL,
     URL = require('url'),
     NET = require('net'),
-    httpps = require('httpps');
+    httpps = require('httpps'),
+    OS = require('os'); // for network interface check;
 
 
 // helpers
 function isLocalhost(host){
     return ((host === 'localhost') || (host === '127.0.0.1') ||
             (host === '0:0:0:0:0:0:0:1') || (host === '::1'));
+}
+
+function isLocalintf(host){
+    var intfs = OS.networkInterfaces();
+    var yes = false;
+    
+    Object.keys(intfs).forEach(function(k){
+        intfs[k].forEach(function(kk){
+            if (host === (intfs[k])[kk].address) yes = true;
+        });
+    });
+    
+    return yes;
 }
 
 // Debug level
@@ -100,7 +114,7 @@ var Proxy = module.exports = function(options, fn){
 	            var srvport = urls.port || 443;
 	            
 	            // check if access to export local host
-	            if ((self.access_local === 0) && isLocalhost(srvip)) {
+	            if ((self.access_local === 0) && (isLocalhost(srvip) || isLocalintf(srvip))) {
                     console.log("http tunnel proxy to " + req.url + ", deny local access on export host");
                     socket.end();
                     return;
