@@ -129,6 +129,14 @@ var prxy = new Proxy({export: export_vurl, usrkey: usrkey,
             cate: 'forward-proxy-export',
             name: 'forward-proxy'
         });
+        // re-report in case reconnection
+        nmcln.on('reready', function(){
+	        nmcln.reportService({
+	            vurl: nmcln.vurl,
+	            cate: 'forward-proxy-export',
+	            name: 'forward-proxy'
+	        });
+        });
     }
 });
 
