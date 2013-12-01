@@ -1,6 +1,6 @@
 1. Open cmd window: Start->Run->CMD, then cd to forward-proxy directory
 
-2. Start export service: .\bin\node.exe .\bin\forward-proxy --key anywords --enable_export 
+2. Start export service: .\bin\node.exe .\bin\forward-proxy --key unlockcn --enable_export 
 
 3. Start import service: .\bin\node.exe .\bin\forward-proxy --key unlockcn --http_port 51866 --socks_port 51888 --turnon_timer
 
@@ -8,5 +8,5 @@
 
 5. If you don't know how to set web browser proxy settings, just google "how to set browser proxy setting"
 
-Notes: for item 2 above, it's for run an export service. Normally, you don't need start it.
+Notes: For item 2 above, it's for run an export service. Normally, you don't need start it. But, it's appreciated running an export service for others.
 
