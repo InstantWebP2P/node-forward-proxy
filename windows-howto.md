@@ -6,3 +6,7 @@
 
 4. Then, set web browser proxy settings point to import service's http proxy srever(127.0.0.1:51866) or socks proxy server(127.0.0.1:51888)
 
+5. If you don't know how to set web browser proxy settings, just google "how to set browser proxy setting"
+
+
+
