@@ -19,11 +19,9 @@ function isLocalintf(host){
     var intfs = OS.networkInterfaces();
     var yes = false;
     
-    Object.keys(intfs).forEach(function(k){
-        intfs[k].forEach(function(kk){
-            if (host === (intfs[k])[kk].address) yes = true;
-        });
-    });
+    for (var k in intfs)
+        for (var kk in intfs[k])
+            if ((intfs[k])[kk].address && ((intfs[k])[kk].address === host)) yes = true;
     
     return yes;
 }
