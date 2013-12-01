@@ -91,6 +91,7 @@ var prxy = new Proxy({export: export_vurl, usrkey: usrkey,
 				    });
 				    
 				    console.log('Socks forward proxy server listen on port '+socks_port);
+				    console.log('You can set browser SOCKS proxy settings point to 127.0.0.1:'+socks_port);
 			    }
 			    
 			    // start http proxy service
@@ -104,6 +105,7 @@ var prxy = new Proxy({export: export_vurl, usrkey: usrkey,
 				    pxySrv.listen(http_port, 50);
 				    
 				    console.log('Http forwar proxy server listen on port '+http_port);
+				    console.log('You can set browser HTTP proxy settings point to 127.0.0.1:'+http_port);
 			    }
 			    
 			    // turn on export service query timer
