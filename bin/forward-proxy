@@ -69,7 +69,7 @@ var prxy = new Proxy({export: export_vurl, usrkey: usrkey,
             if (err || !srv) {
                 console.log('No available export service, please run export service in advance');
             } else {
-                console.log('Available export services: '+JSON.stringify(srv));
+                console.log('%d available export services', Object.keys(srv).length);
                 
                 // start socks proxy service
 			    if (socks_port) {
