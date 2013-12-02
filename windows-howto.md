@@ -1,6 +1,6 @@
 1. Open cmd window: Start->Run->CMD, then cd to forward-proxy directory
 
-2. Start export service: .\bin\node.exe .\bin\forward-proxy --key unlockcn --enable_export 
+2. Start export service: .\bin\node.exe .\bin\forward-proxy --key unlockcn --enable_export --turnon_timer
 
 3. Start import service: .\bin\node.exe .\bin\forward-proxy --key unlockcn --http_port 51866 --socks_port 51888 --turnon_timer
 
