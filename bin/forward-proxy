@@ -131,12 +131,24 @@ var prxy = new Proxy({export: export_vurl, usrkey: usrkey,
         });
         // re-report in case reconnection
         nmcln.on('reready', function(){
-	        nmcln.reportService({
+	        nmcln.updateService({
+	            live: true,
 	            vurl: nmcln.vurl,
 	            cate: 'forward-proxy-export',
 	            name: 'forward-proxy'
 	        });
         });
+		// turn on export service update timer
+	    if (turnon_timer) {
+	        var updateTimer = setInterval(function(){
+		        nmcln.updateService({
+		            live: true,
+		            vurl: nmcln.vurl,
+		            cate: 'forward-proxy-export',
+		            name: 'forward-proxy'
+		        });
+	        }, 166000); // every 3mins
+	    }
     }
 });
 
