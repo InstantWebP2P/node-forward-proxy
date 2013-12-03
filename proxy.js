@@ -328,6 +328,9 @@ var Proxy = module.exports = function(options, fn){
 								if (req.trailers) {
 								    treq.end();
 								}
+								req.on('close', function () {
+								    treq.abort();
+								});
 							});
 			            }
 			        });		        
