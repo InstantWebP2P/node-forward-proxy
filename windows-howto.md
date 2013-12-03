@@ -6,7 +6,7 @@
 
 4. Then, set web browser proxy settings point to import service's http proxy srever(127.0.0.1:51866) or socks proxy server(127.0.0.1:51888)
 
-5. If you don't know how to set web browser proxy settings, just google "how to set browser proxy setting"
+5. To set web browser proxy settings, just google "how to set browser proxy setting"
 
 Notes: For item 2 above, it's for run an export service. Normally, you don't need start it. But, it's appreciated running an export service for others.
 
