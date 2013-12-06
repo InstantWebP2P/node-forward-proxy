@@ -8,5 +8,7 @@
 
 5. To set web browser proxy settings, just google "how to set browser proxy setting"
 
-Notes: For item 2 above, it's for run an export service. Normally, you don't need start it. But, it's appreciated running an export service for others.
+Notes: 
+  For item 2 above, it's for run an export service. Normally, you don't need start it.
+  If you have computers or friends in China, it's appreciated you and your friends running an export service for others.
 
