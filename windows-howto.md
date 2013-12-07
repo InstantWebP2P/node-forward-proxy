@@ -10,5 +10,5 @@
 
 Notes: 
   For item 2 above, it's for run an export service. Normally, you don't need start it.
-  If you have computers or friends in China, it's appreciated you and your friends running an export service for others.
+  If you have computers or friends in Mainland, it's appreciated you and your friends running an export service for others.
 
