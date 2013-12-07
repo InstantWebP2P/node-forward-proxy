@@ -206,11 +206,6 @@ var Proxy = module.exports = function(options, fn){
                     if (self.exportCache[vurle]) {
                         self.exportCache[vurle] = null;
                     }
-                    
-                    // update export service live flag as false
-                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-                        if (err) console.log('update service live flag as false failed');
-                    });
 		        } else {
 			        // 3.
 			        // get peer endpoint
@@ -237,11 +232,6 @@ var Proxy = module.exports = function(options, fn){
 		                    if (self.exportCache[vurle]) {
 		                        self.exportCache[vurle] = null;
 		                    }
-		                    
-		                    // update export service live flag as false
-		                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-		                        if (err) console.log('update service live flag as false failed');
-		                    });          
 			            } else {
 			                // 6.
 						    // setup tunnel to target by make CONNECT request
@@ -394,12 +384,7 @@ var Proxy = module.exports = function(options, fn){
             		// clear export cache
                     if (self.exportCache[vurle]) {
                         self.exportCache[vurle] = null;
-                    }	           
-                                         
-                    // update export service live flag as false
-                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-                        if (err) console.log('update service live flag as false failed');
-                    });
+                    }
 		        } else {
 			        // 3.
 			        // get peer endpoint
@@ -425,12 +410,7 @@ var Proxy = module.exports = function(options, fn){
 		                    // clear export cache
 		                    if (self.exportCache[vurle]) {
 		                        self.exportCache[vurle] = null;
-		                    }
-		                    
-                            // update export service live flag as false
-		                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-		                        if (err) console.log('update service live flag as false failed');
-		                    });		                    
+		                    }        
 			            } else {
 			                // 6.
 						    // setup tunnel to target by make CONNECT request
@@ -528,11 +508,6 @@ var Proxy = module.exports = function(options, fn){
                     if (self.exportCache[vurle]) {
                         self.exportCache[vurle] = null;
                     }
-                    	                                
-                    // update export service live flag as false
-                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-                        if (err) console.log('update service live flag as false failed');
-                    });
 		        } else {
 			        // 3.
 			        // get peer endpoint
@@ -558,12 +533,7 @@ var Proxy = module.exports = function(options, fn){
 		                    // clear export cache
 		                    if (self.exportCache[vurle]) {
 		                        self.exportCache[vurle] = null;
-		                    }
-		                    
-                            // update export service live flag as false
-		                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-		                        if (err) console.log('update service live flag as false failed');
-		                    });		                    
+		                    }            
 			            } else {
 			                // 6.
 						    // setup tunnel to target by make CONNECT request
