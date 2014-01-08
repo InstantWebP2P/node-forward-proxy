@@ -6,7 +6,6 @@ var WEBPP = require('iwebpp.io'),
     URL = require('url'),
     NET = require('net'),
     httpps = require('httpps'),
-    https = require('https'),
     OS = require('os'); // for network interface check;
 
 
@@ -378,7 +377,7 @@ var Proxy = module.exports = function(options, fn){
 									    // set turn-forward-to header: destination name-client's full vURL string
 									    roptions['turn-forward-to'] = vurle;
 									    
-					                    var rreq = https.request(roptions);
+					                    var rreq = httpps.request(roptions);
 										rreq.end();
 										
 										rreq.on('error', function(e) {
@@ -638,7 +637,7 @@ var Proxy = module.exports = function(options, fn){
 									        });
 									    }
 									    							
-										var rreq = https.request(roptions);
+										var rreq = httpps.request(roptions);
 										rreq.end();
 										
 										if (Debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
@@ -839,7 +838,7 @@ var Proxy = module.exports = function(options, fn){
 									        });
 									    }
 										
-										var rreq = https.request(roptions);
+										var rreq = httpps.request(roptions);
 										rreq.end();
 										
 										if (Debug) console.log('socks proxy, connect to %s:%d', dstip, dstport);
