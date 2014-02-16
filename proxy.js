@@ -368,14 +368,16 @@ var Proxy = module.exports = function(options, fn){
 										        path: (/(:\d+)$/gi).test(req.headers.host) ? req.headers.host : req.headers.host+':80',
 										       agent: false
 								        };
-								        // set SSL related options
-									    if (nmcln.secmode && nmcln.secerts) {
+									    // set turn-forward-to header: destination name-client's full vURL string
+									    roptions.headers = {};
+									    roptions.headers['turn-forward-to'] = vurle;
+									    								        // set SSL related options
+								        // TBD...
+									    /*if (nmcln.secmode && nmcln.secerts) {
 									        Object.keys(nmcln.secerts).forEach(function(k){
 									            roptions[k] = nmcln.secerts[k];  
 									        });
-									    }
-									    // set turn-forward-to header: destination name-client's full vURL string
-									    roptions['turn-forward-to'] = vurle;
+									    }*/
 									    
 					                    var rreq = httpps.request(roptions);
 										rreq.end();
@@ -385,7 +387,7 @@ var Proxy = module.exports = function(options, fn){
 									        resErr("tunnel proxy, CONNECT request error: " + e);
 									    });
 									    
-										if (Debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
+										if (Debug) console.log('tunnel proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
 										rreq.on('connect', function(rres, rsocket, rhead) {
 										    if (Debug) console.log('tunnel proxy, got connected');
 										
@@ -624,23 +626,24 @@ var Proxy = module.exports = function(options, fn){
 									        hostname: routing.turn.ipaddr,
 									       
 										      method: 'CONNECT',
-										        path: (/(:\d+)$/gi).test(req.headers.host) ? req.headers.host : req.headers.host+':80',
+										        path: req.url,
 										       agent: false
 								        };
 								        // set turn-forward-to header: destination name-client's full vURL string
-									    roptions['turn-forward-to'] = vurle;
+								        roptions.headers = {};
+									    roptions.headers['turn-forward-to'] = vurle;
 									    
 								        // set SSL related options
-									    if (nmcln.secmode && nmcln.secerts) {
+									    /*if (nmcln.secmode && nmcln.secerts) {
 									        Object.keys(nmcln.secerts).forEach(function(k){
 									            roptions[k] = nmcln.secerts[k];  
 									        });
-									    }
+									    }*/
 									    							
 										var rreq = httpps.request(roptions);
 										rreq.end();
 										
-										if (Debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
+										if (Debug) console.log('tunnel proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
 										rreq.on('connect', function(rres, rsocket, rhead) {
 										    if (Debug) console.log('tunnel proxy, got connected');
 										
@@ -825,23 +828,24 @@ var Proxy = module.exports = function(options, fn){
 									        hostname: routing.turn.ipaddr,
 									       
 										      method: 'CONNECT',
-										        path: (/(:\d+)$/gi).test(req.headers.host) ? req.headers.host : req.headers.host+':80',
+										        path: urle,
 										       agent: false
 								        };
 								        // set turn-forward-to header: destination name-client's full vURL string
-									    roptions['turn-forward-to'] = vurle;
+									    roptions.headers = {};
+									    roptions.headers['turn-forward-to'] = vurle;
 									    
 								        // set SSL related options
-									    if (nmcln.secmode && nmcln.secerts) {
+									    /*if (nmcln.secmode && nmcln.secerts) {
 									        Object.keys(nmcln.secerts).forEach(function(k){
 									            roptions[k] = nmcln.secerts[k];  
 									        });
-									    }
+									    }*/
 										
 										var rreq = httpps.request(roptions);
 										rreq.end();
 										
-										if (Debug) console.log('socks proxy, connect to %s:%d', dstip, dstport);
+										if (Debug) console.log('socks proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
 										rreq.on('connect', function(rres, rsocket, rhead) {
 										    if (Debug) console.log('socks proxy, got connected');
 										
