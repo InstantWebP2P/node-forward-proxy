@@ -5,6 +5,7 @@ var WEBPP = require('iwebpp.io'),
     vURL = WEBPP.vURL,
     URL = require('url'),
     NET = require('net'),
+    UDT = require('udt'),
     httpps = require('httpps'),
     OS = require('os'); // for network interface check;
 
