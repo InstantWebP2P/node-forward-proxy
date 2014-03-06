@@ -236,17 +236,8 @@ var Proxy = module.exports = function(options, fn){
 					                    }
 						            } else {
 							            //  get peer endpoint
-						                var dstip, dstport;
-						                
-						                if ((nmcln.oipaddr === routing.dst.ipaddr) || 
-						                    (isLocalhost(nmcln.oipaddr) && isLocalhost(routing.dst.ipaddr))) {
-						                    dstip   = routing.dst.lipaddr;
-						                    dstport = routing.dst.lport;
-						                } else {
-						                    dstip   = routing.dst.ipaddr;
-						                    dstport = routing.dst.port;
-						                }
-						                
+						                var dstip = stun.peerIP, dstport = stun.peerPort;
+						                						                
 					                    // 6.
 									    // setup tunnel to target by make CONNECT request
 									    var roptions = {
@@ -540,17 +531,8 @@ var Proxy = module.exports = function(options, fn){
 					                    }        
 						            } else {
 						                // get peer endpoint
-						                var dstip, dstport;
-						                
-						                if ((nmcln.oipaddr === routing.dst.ipaddr) || 
-						                    (isLocalhost(nmcln.oipaddr) && isLocalhost(routing.dst.ipaddr))) {
-						                    dstip   = routing.dst.lipaddr;
-						                    dstport = routing.dst.lport;
-						                } else {
-						                    dstip   = routing.dst.ipaddr;
-						                    dstport = routing.dst.port;
-						                }
-						                
+						                var dstip = stun.peerIP, dstport = stun.peerPort;
+						                						                
 						                // 6.
 						                // if req.url is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
@@ -783,17 +765,8 @@ var Proxy = module.exports = function(options, fn){
 					                    }            
 						            } else {
 								        // get peer endpoint
-						                var dstip, dstport;
-						                
-						                if ((nmcln.oipaddr === routing.dst.ipaddr) || 
-						                    (isLocalhost(nmcln.oipaddr) && isLocalhost(routing.dst.ipaddr))) {
-						                    dstip   = routing.dst.lipaddr;
-						                    dstport = routing.dst.lport;
-						                } else {
-						                    dstip   = routing.dst.ipaddr;
-						                    dstport = routing.dst.port;
-						                }
-						                
+						                var dstip = stun.peerIP, dstport = stun.peerPort;
+						                						                
 						                // 6.
 						                // if address:port is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
