@@ -11,7 +11,7 @@
     "p2p",
     "http",
     "httpp",
-    "proxy",
+    "webproxy",
     "forward-proxy",
     "socks5",
     "webp2p",
