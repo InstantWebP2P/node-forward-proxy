@@ -953,7 +953,7 @@ var Proxy = module.exports = function(options, fn){
 // TBD... geoip based algorithm for host/url
 Proxy.prototype.findExport = function(host, url){
     var self = this;
-    var rndm = Date.now();
+    var rndm = Math.ceil(Math.random() * 1000000);
     var vkey = [];
     
     // screen valid export 
