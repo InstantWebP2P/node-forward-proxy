@@ -112,6 +112,17 @@ var prxy = new Proxy({export: export_vurl, usrkey: usrkey,
 			    if (turnon_timer) prxy.turnQuerytimer(true);
             }
         });
+        
+        // query export service in case reconnection
+        nmcln.on('reready', function(){
+	        prxy.queryExport(function(err, srv){
+	            if (err || !srv) {
+	                console.log('No available export service, please run export service in advance');
+	            } else {
+	                console.log('%d available export services', Object.keys(srv).length);
+	            }
+	        });
+        });
     }
     
     // Export service ...
@@ -131,12 +142,24 @@ var prxy = new Proxy({export: export_vurl, usrkey: usrkey,
         });
         // re-report in case reconnection
         nmcln.on('reready', function(){
-	        nmcln.reportService({
+	        nmcln.updateService({
+	            live: true,
 	            vurl: nmcln.vurl,
 	            cate: 'forward-proxy-export',
 	            name: 'forward-proxy'
 	        });
         });
+		// turn on export service update timer
+	    if (turnon_timer) {
+	        var updateTimer = setInterval(function(){
+		        nmcln.updateService({
+		            live: true,
+		            vurl: nmcln.vurl,
+		            cate: 'forward-proxy-export',
+		            name: 'forward-proxy'
+		        });
+	        }, 166000); // every 3mins
+	    }
     }
 });
 

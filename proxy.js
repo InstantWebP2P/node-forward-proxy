@@ -5,6 +5,7 @@ var WEBPP = require('iwebpp.io'),
     vURL = WEBPP.vURL,
     URL = require('url'),
     NET = require('net'),
+    UDT = require('udt'),
     httpps = require('httpps'),
     OS = require('os'); // for network interface check;
 
@@ -123,12 +124,11 @@ var Proxy = module.exports = function(options, fn){
                     if (Debug) console.log('http tunnel proxy, got connected!');   
                     
                     ///srvSocket.write(head); 
-				    socket.pipe(srvSocket);
-				        
 				    socket.write('HTTP/1.1 200 Connection Established\r\n' +
 				                 'Proxy-agent: Node-Proxy\r\n' +
 				                 '\r\n');
 				    srvSocket.pipe(socket);
+				    socket.pipe(srvSocket);
                 });
   
 				srvSocket.setNoDelay(true);
@@ -206,131 +206,240 @@ var Proxy = module.exports = function(options, fn){
                     if (self.exportCache[vurle]) {
                         self.exportCache[vurle] = null;
                     }
-                    
-                    // update export service live flag as false
-                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-                        if (err) console.log('update service live flag as false failed');
-                    });
 		        } else {
 			        // 3.
-			        // get peer endpoint
-	                var dstip, dstport;
-	                
-	                if ((nmcln.oipaddr === routing.dst.ipaddr) || 
-	                    (isLocalhost(nmcln.oipaddr) && isLocalhost(routing.dst.ipaddr))) {
-	                    dstip   = routing.dst.lipaddr;
-	                    dstport = routing.dst.lport;
-	                } else {
-	                    dstip   = routing.dst.ipaddr;
-	                    dstport = routing.dst.port;
-	                }
-			        		    
-			        // 5.
-			        // traverse STUN session to peer
-			        nmcln.trvsSTUN(vurle, function(err, stun){
-			            if (err || !stun) {
-				            // STUN not availabe
-		                    resErr('STUN not available, please use TURN');
-		                    console.error('STUN not available:'+urle);
-		                    
-		                    // clear export cache
+			        // check STUN alability
+			        nmcln.checkStunable(vurle, function(err, yes){
+			            if (err) {
+					        // invalid vURL
+			                resErr('invalid URL');
+			                console.error('invalid URL:'+urle);
+			                
+		            		// clear export cache
 		                    if (self.exportCache[vurle]) {
 		                        self.exportCache[vurle] = null;
 		                    }
-		                    
-		                    // update export service live flag as false
-		                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-		                        if (err) console.log('update service live flag as false failed');
-		                    });          
 			            } else {
-			                // 6.
-						    // setup tunnel to target by make CONNECT request
-						    var roptions = {
-							        port: dstport,
-							    hostname: dstip,
-							      method: 'CONNECT',
-							        path: (/(:\d+)$/gi).test(req.headers.host) ? req.headers.host : req.headers.host+':80',
-							       agent: false,
-							        
-							    // set user-specific feature,like maxim bandwidth,etc
-			                    localAddress: {
-			                        addr: nmcln.ipaddr,
-			                        port: nmcln.port, 
-			                        
-			                        opt: {
-			                            mbw: options.mbw || null
-			                        }
-			                    }
-					        };
-					        // set SSL related options
-						    if (nmcln.secmode && nmcln.secerts) {
-						        Object.keys(nmcln.secerts).forEach(function(k){
-						            roptions[k] = nmcln.secerts[k];  
-						        });
-						    }
-						    							
-							var rreq = httpps.request(roptions);
-							rreq.end();
-							rreq.on('error', function(e) {
-						        console.log("tunnel proxy, CONNECT request error: " + e);					        
-						        resErr("tunnel proxy, CONNECT request error: " + e);
-						    });
-						    
-							if (Debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
-							rreq.on('connect', function(rres, rsocket, rhead) {
-							    if (Debug) console.log('tunnel proxy, got connected');
-							
-							    rsocket.on('error', function(e) {
-							        console.log("tunnel proxy, socket error: " + e);
-							        resErr("tunnel proxy, socket error: " + e);
-							    });
-							    
-							    // request on tunnel connection
-							    var toptions = {
-								              method: req.method,
-								                path: req.url.match(/^(http:)/gi)? URL.parse(req.url).path : req.url,
-								               agent: false,
-								               
-								             // set headers
-								             headers: req.headers,
-								             
-								    // pass rsocket which's request on           
-								    createConnection: function(port, host, options){
-								        return rsocket
-								    } 
-						        };
-								
-								var treq = httpps.request(toptions, function(tres){
-								    if (Debug) console.log('tunnel proxy, got response, headers:'+JSON.stringify(tres.headers));
-								    
-								    // set headers
-								    Object.keys(tres.headers).forEach(function (key) {
-								      res.setHeader(key, tres.headers[key]);
-								    });
-								    res.writeHead(tres.statusCode);
-								    
-								    tres.pipe(res);
-								    
-								    tres.on('error', function(e) {
-							            console.log("tunnel proxy, tunnel response error: " + e);					        
-							            resErr("tunnel proxy, tunnel response error: " + e);
-						            });
-								});
-								treq.on('error', function(e) {
-							        console.log("tunnel proxy, tunnel request error: " + e);					        
-							        resErr("tunnel proxy, tunnel request error: " + e);
-						        });
-								req.pipe(treq);
-								req.on('error', resErr);
-								req.on('aborted', function () {
-								    treq.abort();
-								});
-								if (req.trailers) {
-								    treq.end();
-								}
-							});
+			                // over STUN
+			                if (yes) {
+						        // 5.
+						        // traverse STUN session to peer
+						        nmcln.trvsSTUN(vurle, function(err, stun){						        
+						            if (err || !stun) {
+							            // STUN not availabe
+					                    resErr('STUN not available, please use TURN');
+					                    console.error('STUN not available:'+urle);
+					                    
+					                    // clear export cache
+					                    if (self.exportCache[vurle]) {
+					                        self.exportCache[vurle] = null;
+					                    }
+						            } else {
+							            //  get peer endpoint
+						                var dstip = stun.peerIP, dstport = stun.peerPort;
+						                						                
+					                    // 6.
+									    // setup tunnel to target by make CONNECT request
+									    var roptions = {
+									            port: dstport,
+									        hostname: dstip,
+									        
+										      method: 'CONNECT',
+										        path: (/(:\d+)$/gi).test(req.headers.host) ? req.headers.host : req.headers.host+':80',
+										       agent: false,
+										       
+					                        // set user-specific feature,like maxim bandwidth,etc
+					                        localAddress: {
+						                        addr: nmcln.ipaddr,
+						                        port: nmcln.port, 
+						                        
+						                        opt: {
+						                            mbw: options.mbw || null
+						                        }
+						                    }
+								        };
+								        // set SSL related options
+									    if (nmcln.secmode && nmcln.secerts) {
+									        Object.keys(nmcln.secerts).forEach(function(k){
+									            roptions[k] = nmcln.secerts[k];  
+									        });
+									    }
+									    
+					                    var rreq = httpps.request(roptions);
+										rreq.end();
+										
+										rreq.on('error', function(e) {
+									        console.log("tunnel proxy, CONNECT request error: " + e);					        
+									        resErr("tunnel proxy, CONNECT request error: " + e);
+									    });
+									    
+										if (Debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
+										rreq.on('connect', function(rres, rsocket, rhead) {
+										    if (Debug) console.log('tunnel proxy, got connected');
+										
+										    rsocket.on('error', function(e) {
+										        console.log("tunnel proxy, socket error: " + e);
+										        resErr("tunnel proxy, socket error: " + e);
+										    });
+										    
+										    // request on tunnel connection
+										    var toptions = {
+											              method: req.method,
+											                path: req.url.match(/^(http:)/gi)? URL.parse(req.url).path : req.url,
+											               agent: false,
+											               
+											             // set headers
+											             headers: req.headers,
+											             
+											    // pass rsocket which's request on           
+											    createConnection: function(port, host, options){
+											        return rsocket
+											    } 
+									        };
+											
+											var treq = httpps.request(toptions, function(tres){
+											    if (Debug) console.log('tunnel proxy, got response, headers:'+JSON.stringify(tres.headers));
+											    
+											    // set headers
+											    Object.keys(tres.headers).forEach(function (key) {
+											      res.setHeader(key, tres.headers[key]);
+											    });
+											    res.writeHead(tres.statusCode);
+											    
+											    tres.pipe(res);
+											    
+											    tres.on('error', function(e) {
+										            console.log("tunnel proxy, tunnel response error: " + e);					        
+										            resErr("tunnel proxy, tunnel response error: " + e);
+									            });
+											});
+											treq.on('error', function(e) {
+										        console.log("tunnel proxy, tunnel request error: " + e);					        
+										        resErr("tunnel proxy, tunnel request error: " + e);
+									        });
+											req.pipe(treq);
+											req.on('error', resErr);
+											req.on('aborted', function () {
+											    treq.abort();
+											});
+											if (req.trailers) {
+											    treq.end();
+											}
+											req.on('close', function () {
+											    treq.abort();
+											});
+										});
+						            }
+						        });		        			                    
+			                    
+			                } else {
+			                    // over TURN
+			                    
+						        // 5.
+						        // traverse TURN session to peer
+						        // notes: TURN session will use vToken for authentication
+						        nmcln.trvsTURN(vurle, function(err, turn){						        
+						            if (err || !turn) {
+							            // TURN not availabe
+					                    resErr('TURN not available, please check TURN service setup');
+					                    console.error('TURN not available:'+urle);
+					                    
+					                    // clear export cache
+					                    if (self.exportCache[vurle]) {
+					                        self.exportCache[vurle] = null;
+					                    }
+						            } else {
+						                // 6.
+									    // setup tunnel to target by make CONNECT request
+									    var roptions = {
+									            port: routing.turn.proxyport,
+									        hostname: routing.turn.ipaddr,
+									       
+										      method: 'CONNECT',
+										        path: (/(:\d+)$/gi).test(req.headers.host) ? req.headers.host : req.headers.host+':80',
+										       agent: false
+								        };
+									    // set turn-forward-to header: destination name-client's full vURL string
+									    roptions.headers = {};
+									    roptions.headers['turn-forward-to'] = vurle;
+									    								        // set SSL related options
+								        // TBD...
+									    /*if (nmcln.secmode && nmcln.secerts) {
+									        Object.keys(nmcln.secerts).forEach(function(k){
+									            roptions[k] = nmcln.secerts[k];  
+									        });
+									    }*/
+									    
+					                    var rreq = httpps.request(roptions);
+										rreq.end();
+										
+										rreq.on('error', function(e) {
+									        console.log("tunnel proxy, CONNECT request error: " + e);					        
+									        resErr("tunnel proxy, CONNECT request error: " + e);
+									    });
+									    
+										if (Debug) console.log('tunnel proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
+										rreq.on('connect', function(rres, rsocket, rhead) {
+										    if (Debug) console.log('tunnel proxy, got connected');
+										
+										    rsocket.on('error', function(e) {
+										        console.log("tunnel proxy, socket error: " + e);
+										        resErr("tunnel proxy, socket error: " + e);
+										    });
+										    
+										    // request on tunnel connection
+										    var toptions = {
+											              method: req.method,
+											                path: req.url.match(/^(http:)/gi)? URL.parse(req.url).path : req.url,
+											               agent: false,
+											               
+											             // set headers
+											             headers: req.headers,
+											             
+											    // pass rsocket which's request on           
+											    createConnection: function(port, host, options){
+											        return rsocket
+											    } 
+									        };
+											
+											var treq = httpps.request(toptions, function(tres){
+											    if (Debug) console.log('tunnel proxy, got response, headers:'+JSON.stringify(tres.headers));
+											    
+											    // set headers
+											    Object.keys(tres.headers).forEach(function (key) {
+											      res.setHeader(key, tres.headers[key]);
+											    });
+											    res.writeHead(tres.statusCode);
+											    
+											    tres.pipe(res);
+											    
+											    tres.on('error', function(e) {
+										            console.log("tunnel proxy, tunnel response error: " + e);					        
+										            resErr("tunnel proxy, tunnel response error: " + e);
+									            });
+											});
+											treq.on('error', function(e) {
+										        console.log("tunnel proxy, tunnel request error: " + e);					        
+										        resErr("tunnel proxy, tunnel request error: " + e);
+									        });
+											req.pipe(treq);
+											req.on('error', resErr);
+											req.on('aborted', function () {
+											    treq.abort();
+											});
+											if (req.trailers) {
+											    treq.end();
+											}
+											req.on('close', function () {
+											    treq.abort();
+											});
+										});
+						            }
+						        });					                    
+			                    
+			                }
 			            }
-			        });		        
+			        });
 		        }
 	        });
 	    }
@@ -391,96 +500,197 @@ var Proxy = module.exports = function(options, fn){
             		// clear export cache
                     if (self.exportCache[vurle]) {
                         self.exportCache[vurle] = null;
-                    }	           
-                                         
-                    // update export service live flag as false
-                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-                        if (err) console.log('update service live flag as false failed');
-                    });
+                    }
 		        } else {
 			        // 3.
-			        // get peer endpoint
-	                var dstip, dstport;
-	                
-	                if ((nmcln.oipaddr === routing.dst.ipaddr) || 
-	                    (isLocalhost(nmcln.oipaddr) && isLocalhost(routing.dst.ipaddr))) {
-	                    dstip   = routing.dst.lipaddr;
-	                    dstport = routing.dst.lport;
-	                } else {
-	                    dstip   = routing.dst.ipaddr;
-	                    dstport = routing.dst.port;
-	                }
-			        		    
-			        // 5.
-			        // traverse STUN session to peer
-			        nmcln.trvsSTUN(vurle, function(err, stun){
-			            if (err || !stun) {
-				            // STUN not availabe
-		                    socket.end('STUN not available, please use TURN');
-		                    console.error('STUN not available:'+urle);
-		                    
-		                    // clear export cache
+			        // check STUN alability
+			        nmcln.checkStunable(vurle, function(err, yes){
+			            if (err) {
+					        // invalid vURL
+			                resErr('invalid URL');
+			                console.error('invalid URL:'+urle);
+			                
+		            		// clear export cache
 		                    if (self.exportCache[vurle]) {
 		                        self.exportCache[vurle] = null;
 		                    }
-		                    
-                            // update export service live flag as false
-		                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-		                        if (err) console.log('update service live flag as false failed');
-		                    });		                    
 			            } else {
-			                // 6.
-						    // setup tunnel to target by make CONNECT request
-						    var roptions = {
-							        port: dstport,
-							    hostname: dstip,
-							      method: 'CONNECT',
-							        path: req.url,
-							       agent: false,
-							        
-							    // set user-specific feature,like maxim bandwidth,etc
-			                    localAddress: {
-			                        addr: nmcln.ipaddr,
-			                        port: nmcln.port, 
-			                        
-			                        opt: {
-			                            mbw: options.mbw || null
-			                        }
-			                    }
-					        };
-					        // set SSL related options
-						    if (nmcln.secmode && nmcln.secerts) {
-						        Object.keys(nmcln.secerts).forEach(function(k){
-						            roptions[k] = nmcln.secerts[k];  
-						        });
-						    }
-						    							
-							var rreq = httpps.request(roptions);
-							rreq.end();
-							
-							if (Debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
-							rreq.on('connect', function(rres, rsocket, rhead) {
-							    if (Debug) console.log('tunnel proxy, got connected');
-							
-							    socket.write('HTTP/1.1 200 Connection Established\r\n' +
-							                 'Proxy-agent: Node-Proxy\r\n' +
-								             '\r\n');
-								
-								rsocket.pipe(socket);
-								socket.pipe(rsocket);
-								
-							    rsocket.on('error', function(e) {
-							        console.log("tunnel proxy, socket error: " + e);
-							        socket.end();
-							    });
-							});
-							
-							rreq.on('error', function(e) {
-						        console.log("tunnel proxy, CONNECT request error: " + e);					        
-						        socket.end();
-						    });
-			            }
-			        });		        
+			                // over STUN
+			                if (yes) {
+						        // 5.
+						        // traverse STUN session to peer
+						        nmcln.trvsSTUN(vurle, function(err, stun){
+						            if (err || !stun) {
+							            // STUN not availabe
+					                    socket.end('STUN not available, please use TURN');
+					                    console.error('STUN not available:'+urle);
+					                    
+					                    // clear export cache
+					                    if (self.exportCache[vurle]) {
+					                        self.exportCache[vurle] = null;
+					                    }        
+						            } else {
+						                // get peer endpoint
+						                var dstip = stun.peerIP, dstport = stun.peerPort;
+						                						                
+						                // 6.
+						                // if req.url is valid vURL, connect it directly,
+						                // otherwise do CONNECT tunnel over export vURL 
+						                if (urle.match(vurle)) {
+						                    // 6.1
+						                    // connect it directly						                    	            
+							                if (Debug) console.log('https proxy, httpp connect to %s:%d', dstip, dstport);
+							                
+							                // connection options
+							                var coptions = {
+							                    port: dstport, 
+							                    host: dstip, 
+							                    
+							                    // set user-specific feature,like maxim bandwidth,etc
+							                    localAddress: {
+							                        addr: nmcln.ipaddr,
+							                        port: nmcln.port, 
+							                        
+							                        opt: {
+							                            mbw: options.mbw || null
+							                        }
+							                    }
+							                };
+							                var srvSocket = UDT.connect(coptions, function() {
+							                    if (Debug) console.log('https proxy, httpp connect, got connected!');   
+							                    
+							                    socket.write('HTTP/1.1 200 Connection Established\r\n' +
+											                 'Proxy-agent: Node-Proxy\r\n' +
+												             '\r\n');
+												
+												srvSocket.pipe(socket);
+												socket.pipe(srvSocket);
+							                });
+											    
+											srvSocket.on('error', function(e) {
+											    console.log("https proxy, httpp connect to " + req.url + ", socket error: " + e);
+											    socket.end();
+											});						                    
+						                } else {
+							                // 6.2
+										    // setup tunnel to target by make CONNECT request
+										    var roptions = {
+											        port: dstport,
+											    hostname: dstip,
+											      method: 'CONNECT',
+											        path: req.url,
+											       agent: false,
+											        
+											    // set user-specific feature,like maxim bandwidth,etc
+							                    localAddress: {
+							                        addr: nmcln.ipaddr,
+							                        port: nmcln.port, 
+							                        
+							                        opt: {
+							                            mbw: options.mbw || null
+							                        }
+							                    }
+									        };
+									        // set SSL related options
+										    if (nmcln.secmode && nmcln.secerts) {
+										        Object.keys(nmcln.secerts).forEach(function(k){
+										            roptions[k] = nmcln.secerts[k];  
+										        });
+										    }
+										    							
+											var rreq = httpps.request(roptions);
+											rreq.end();
+											
+											if (Debug) console.log('tunnel proxy, connect to %s:%d', dstip, dstport);
+											rreq.on('connect', function(rres, rsocket, rhead) {
+											    if (Debug) console.log('tunnel proxy, got connected');
+											
+											    socket.write('HTTP/1.1 200 Connection Established\r\n' +
+											                 'Proxy-agent: Node-Proxy\r\n' +
+												             '\r\n');
+												
+												rsocket.pipe(socket);
+												socket.pipe(rsocket);
+												
+											    rsocket.on('error', function(e) {
+											        console.log("tunnel proxy, socket error: " + e);
+											        socket.end();
+											    });
+											});
+											
+											rreq.on('error', function(e) {
+										        console.log("tunnel proxy, CONNECT request error: " + e);					        
+										        socket.end();
+										    });
+									    }
+						            }
+						        });		        
+			                } else {
+			                    // over TURN
+			                    
+						        // 5.
+						        // traverse TURN session to peer
+						        nmcln.trvsTURN(vurle, function(err, turn){
+						            if (err || !turn) {
+							            // TURN not availabe
+					                    resErr('TURN not available, please check TURN service setup');
+					                    console.error('TURN not available:'+urle);
+					                    
+					                    // clear export cache
+					                    if (self.exportCache[vurle]) {
+					                        self.exportCache[vurle] = null;
+					                    }
+						            } else {
+						                // 6.
+									    // setup tunnel to target by make CONNECT request
+									    var roptions = {
+									            port: routing.turn.proxyport,
+									        hostname: routing.turn.ipaddr,
+									       
+										      method: 'CONNECT',
+										        path: req.url,
+										       agent: false
+								        };
+								        // set turn-forward-to header: destination name-client's full vURL string
+								        roptions.headers = {};
+									    roptions.headers['turn-forward-to'] = vurle;
+									    
+								        // set SSL related options
+									    /*if (nmcln.secmode && nmcln.secerts) {
+									        Object.keys(nmcln.secerts).forEach(function(k){
+									            roptions[k] = nmcln.secerts[k];  
+									        });
+									    }*/
+									    							
+										var rreq = httpps.request(roptions);
+										rreq.end();
+										
+										if (Debug) console.log('tunnel proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
+										rreq.on('connect', function(rres, rsocket, rhead) {
+										    if (Debug) console.log('tunnel proxy, got connected');
+										
+										    socket.write('HTTP/1.1 200 Connection Established\r\n' +
+										                 'Proxy-agent: Node-Proxy\r\n' +
+											             '\r\n');
+											
+											rsocket.pipe(socket);
+											socket.pipe(rsocket);
+											
+										    rsocket.on('error', function(e) {
+										        console.log("tunnel proxy, socket error: " + e);
+										        socket.end();
+										    });
+										});
+										
+										rreq.on('error', function(e) {
+									        console.log("tunnel proxy, CONNECT request error: " + e);					        
+									        socket.end();
+									    });
+						            }
+						        });		        			                    
+			                }		        
+		                }
+		            });
 		        }
 	        });
 	    }	    
@@ -525,94 +735,193 @@ var Proxy = module.exports = function(options, fn){
                     if (self.exportCache[vurle]) {
                         self.exportCache[vurle] = null;
                     }
-                    	                                
-                    // update export service live flag as false
-                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-                        if (err) console.log('update service live flag as false failed');
-                    });
 		        } else {
 			        // 3.
-			        // get peer endpoint
-	                var dstip, dstport;
-	                
-	                if ((nmcln.oipaddr === routing.dst.ipaddr) || 
-	                    (isLocalhost(nmcln.oipaddr) && isLocalhost(routing.dst.ipaddr))) {
-	                    dstip   = routing.dst.lipaddr;
-	                    dstport = routing.dst.lport;
-	                } else {
-	                    dstip   = routing.dst.ipaddr;
-	                    dstport = routing.dst.port;
-	                }
-			        		    
-			        // 5.
-			        // traverse STUN session to peer
-			        nmcln.trvsSTUN(vurle, function(err, stun){
-			            if (err || !stun) {
-				            // STUN not availabe
-		                    socket.end('STUN not available, please use TURN');
-		                    console.error('STUN not available:'+urle);
-		                    
-		                    // clear export cache
+			        // check STUN alability
+			        nmcln.checkStunable(vurle, function(err, yes){
+			            if (err) {
+					        // invalid vURL
+			                resErr('invalid URL');
+			                console.error('invalid URL:'+urle);
+			                
+		            		// clear export cache
 		                    if (self.exportCache[vurle]) {
 		                        self.exportCache[vurle] = null;
 		                    }
-		                    
-                            // update export service live flag as false
-		                    nmcln.updateService({cate: 'forward-proxy-export', vurl: vurle, live: false}, function(err){
-		                        if (err) console.log('update service live flag as false failed');
-		                    });		                    
 			            } else {
-			                // 6.
-						    // setup tunnel to target by make CONNECT request
-						    var roptions = {
-							        port: dstport,
-							    hostname: dstip,
-							      method: 'CONNECT',
-							        path: urle,
-							       agent: false,
-							        
-							    // set user-specific feature,like maxim bandwidth,etc
-			                    localAddress: {
-			                        addr: nmcln.ipaddr,
-			                        port: nmcln.port, 
-			                        
-			                        opt: {
-			                            mbw: options.mbw || null
-			                        }
-			                    }
-					        };
-					        // set SSL related options
-						    if (nmcln.secmode && nmcln.secerts) {
-						        Object.keys(nmcln.secerts).forEach(function(k){
-						            roptions[k] = nmcln.secerts[k];  
-						        });
-						    }
-							
-							var rreq = httpps.request(roptions);
-							rreq.end();
-							
-							if (Debug) console.log('socks proxy, connect to %s:%d', dstip, dstport);
-							rreq.on('connect', function(rres, rsocket, rhead) {
-							    if (Debug) console.log('socks proxy, got connected');
-							
-							    // send socks response      
-							    proxy_ready();
-								
-								rsocket.pipe(socket);
-								socket.pipe(rsocket);
-								
-							    rsocket.on('error', function(e) {
-							        console.log("socks proxy, socket error: " + e);
-							        socket.end();
-							    });
-							});
-							
-							rreq.on('error', function(e) {
-						        console.log("socks proxy, CONNECT request error: " + e);					        
-						        socket.end();
-						    });
+			                // over STUN
+			                if (yes) {
+						        // 5.
+						        // traverse STUN session to peer
+						        nmcln.trvsSTUN(vurle, function(err, stun){
+						            if (err || !stun) {
+							            // STUN not availabe
+					                    socket.end('STUN not available, please use TURN');
+					                    console.error('STUN not available:'+urle);
+					                    
+					                    // clear export cache
+					                    if (self.exportCache[vurle]) {
+					                        self.exportCache[vurle] = null;
+					                    }            
+						            } else {
+								        // get peer endpoint
+						                var dstip = stun.peerIP, dstport = stun.peerPort;
+						                						                
+						                // 6.
+						                // if address:port is valid vURL, connect it directly,
+						                // otherwise do CONNECT tunnel over export vURL 
+						                if (urle.match(vurle)) {
+						                    // 6.1
+						                    // connect it directly						                    	            
+							                if (Debug) console.log('socks proxy, httpp connect to %s:%d', dstip, dstport);
+							                
+							                // connection options
+							                var coptions = {
+							                    port: dstport, 
+							                    host: dstip, 
+							                    
+							                    // set user-specific feature,like maxim bandwidth,etc
+							                    localAddress: {
+							                        addr: nmcln.ipaddr,
+							                        port: nmcln.port, 
+							                        
+							                        opt: {
+							                            mbw: options.mbw || null
+							                        }
+							                    }
+							                };
+							                var srvSocket = UDT.connect(coptions, function() {
+											    if (Debug) console.log('socks proxy, httpp got connected');
+											
+											    // send socks response      
+											    proxy_ready();
+												
+												srvSocket.pipe(socket);
+												socket.pipe(srvSocket);
+							                });
+											    
+											srvSocket.on('error', function(e) {
+											    console.log("socks proxy, httpp socket error: " + e);
+											    socket.end();
+											});						                    
+						                } else {						                
+							                // 6.2
+										    // setup tunnel to target by make CONNECT request
+										    var roptions = {
+											        port: dstport,
+											    hostname: dstip,
+											      method: 'CONNECT',
+											        path: urle,
+											       agent: false,
+											        
+											    // set user-specific feature,like maxim bandwidth,etc
+							                    localAddress: {
+							                        addr: nmcln.ipaddr,
+							                        port: nmcln.port, 
+							                        
+							                        opt: {
+							                            mbw: options.mbw || null
+							                        }
+							                    }
+									        };
+									        // set SSL related options
+										    if (nmcln.secmode && nmcln.secerts) {
+										        Object.keys(nmcln.secerts).forEach(function(k){
+										            roptions[k] = nmcln.secerts[k];  
+										        });
+										    }
+											
+											var rreq = httpps.request(roptions);
+											rreq.end();
+											
+											if (Debug) console.log('socks proxy, connect to %s:%d', dstip, dstport);
+											rreq.on('connect', function(rres, rsocket, rhead) {
+											    if (Debug) console.log('socks proxy, got connected');
+											
+											    // send socks response      
+											    proxy_ready();
+												
+												rsocket.pipe(socket);
+												socket.pipe(rsocket);
+												
+											    rsocket.on('error', function(e) {
+											        console.log("socks proxy, socket error: " + e);
+											        socket.end();
+											    });
+											});
+											
+											rreq.on('error', function(e) {
+										        console.log("socks proxy, CONNECT request error: " + e);					        
+										        socket.end();
+										    });
+									    }
+						            }
+						        });		        
+			                } else {
+			                    // over TURN
+			                	
+			                	// 5.
+						        // traverse TURN session to peer
+						        nmcln.trvsTURN(vurle, function(err, turn){
+						            if (err || !turn) {
+							            // TURN not availabe
+					                    resErr('TURN not available, please check TURN service setup');
+					                    console.error('TURN not available:'+urle);
+					                    
+					                    // clear export cache
+					                    if (self.exportCache[vurle]) {
+					                        self.exportCache[vurle] = null;
+					                    }
+						            } else {
+						                // 6.
+									    // setup tunnel to target by make CONNECT request
+									    var roptions = {
+									            port: routing.turn.proxyport,
+									        hostname: routing.turn.ipaddr,
+									       
+										      method: 'CONNECT',
+										        path: urle,
+										       agent: false
+								        };
+								        // set turn-forward-to header: destination name-client's full vURL string
+									    roptions.headers = {};
+									    roptions.headers['turn-forward-to'] = vurle;
+									    
+								        // set SSL related options
+									    /*if (nmcln.secmode && nmcln.secerts) {
+									        Object.keys(nmcln.secerts).forEach(function(k){
+									            roptions[k] = nmcln.secerts[k];  
+									        });
+									    }*/
+										
+										var rreq = httpps.request(roptions);
+										rreq.end();
+										
+										if (Debug) console.log('socks proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
+										rreq.on('connect', function(rres, rsocket, rhead) {
+										    if (Debug) console.log('socks proxy, got connected');
+										
+										    // send socks response      
+										    proxy_ready();
+											
+											rsocket.pipe(socket);
+											socket.pipe(rsocket);
+											
+										    rsocket.on('error', function(e) {
+										        console.log("socks proxy, socket error: " + e);
+										        socket.end();
+										    });
+										});
+										
+										rreq.on('error', function(e) {
+									        console.log("socks proxy, CONNECT request error: " + e);					        
+									        socket.end();
+									    });
+						            }
+						        });		        
+			                }		    
 			            }
-			        });		        
+			        });
 		        }
 	        });
 	    }
@@ -644,7 +953,7 @@ var Proxy = module.exports = function(options, fn){
 // TBD... geoip based algorithm for host/url
 Proxy.prototype.findExport = function(host, url){
     var self = this;
-    var rndm = Date.now();
+    var rndm = Math.ceil(Math.random() * 1000000);
     var vkey = [];
     
     // screen valid export 

@@ -1,7 +1,7 @@
 node-forward-proxy
 ===============
 
-p2p http and socks forward proxy based on iWebPP.io and Node.js
+p2p http and socks forward webproxy based on iWebPP.io and Node.js
 
 ### Features
 
@@ -10,10 +10,14 @@ p2p http and socks forward proxy based on iWebPP.io and Node.js
 * secure p2p proxy tunnel to build user-defined webvpn service
 * high udp data transfer performance
 
-### Install
+### Install manually
 * npm install forward-proxy, or git clone https://github.com/InstantWebP2P/forward-proxy.git && cd forward-proxy && npm install
 * forward-proxy depend on node-httpp, please npm install httpp-binary.if the binary didn't work, just build it from source:
   https://github.com/InstantWebP2P/node-httpp
+
+### Install with prebuilt packages, just download and unzip it
+* windows package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-windows.zip
+* OSx package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-osx.zip
 
 ### Usage/API
 * for export service, refer to demo/export.js. to start it, just node demo/export.js
@@ -23,7 +27,7 @@ p2p http and socks forward proxy based on iWebPP.io and Node.js
 * web browser is http proxy / socks proxy client
 * after setup export service and start http or socks server, then set web browser proxy settings point to http/socks server
 * for forward-proxy util, refer to bin/forward-proxy. to start it, just node bin/forward-proxy --key usrkey(MUST) --http_port xxx --socks_port xxx --export_vurl vURL --enable_export
-* export/import service's usrkey need to be same
+* export/import service's usrkey MUST same
 
 <br/>
 ### License
