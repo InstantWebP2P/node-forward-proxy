@@ -362,7 +362,8 @@ var Proxy = module.exports = function(options, fn){
 									    // set turn-forward-to header: destination name-client's full vURL string
 									    roptions.headers = {};
 									    roptions.headers['turn-forward-to'] = vurle;
-									    								        // set SSL related options
+									    
+									    // set SSL related options
 								        // TBD...
 									    /*if (nmcln.secmode && nmcln.secerts) {
 									        Object.keys(nmcln.secerts).forEach(function(k){
@@ -1004,16 +1005,20 @@ Proxy.prototype.queryExport = function(fn){
 
 // Turn on/off export service query timer
 // - on: true or false
-// - timeout: optional, default is 6mins
+// - timeout: optional, default is 20s
 Proxy.prototype.turnQuerytimer = function(on, timeout){
     var self = this;
+    timeout = timeout || 20000;
     
     if (on && !self.qsInterval) {
         if (Debug) console.log('turn on export service query timemout '+timeout);
         
+        // query for the first time
+        self.queryExport();
+        
         self.qsInterval = setInterval(function(){
             self.queryExport();
-        }, timeout || 360000);
+        }, timeout);
     } else {
         if (self.qsInterval) {
             if (Debug) console.log('turn off export service query timer');
