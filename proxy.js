@@ -282,6 +282,7 @@ var Proxy = module.exports = function(options, fn){
 										        resErr("tunnel proxy, socket error: " + e);
 										    });
 										    
+										    if (Debug) console.log('req.headers: '+JSON.stringify(req.headers));
 										    // request on tunnel connection
 										    var toptions = {
 											              method: req.method,
