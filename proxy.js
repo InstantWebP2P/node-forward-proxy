@@ -538,7 +538,8 @@ var Proxy = module.exports = function(options, fn){
 						                // 6.
 						                // if req.url is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
-						                if (urle.match(vurle)) {
+						                // notes: disable it to avoid middle-man attack
+						                if (0/*urle.match(vurle)*/) {
 						                    // 6.1
 						                    // connect it directly						                    	            
 							                if (Debug) console.log('https proxy, httpp connect to %s:%d', dstip, dstport);
@@ -772,7 +773,8 @@ var Proxy = module.exports = function(options, fn){
 						                // 6.
 						                // if address:port is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
-						                if (urle.match(vurle)) {
+						                // notes: disable it to avoid middle-man attack
+						                if (0/*urle.match(vurle)*/) {
 						                    // 6.1
 						                    // connect it directly						                    	            
 							                if (Debug) console.log('socks proxy, httpp connect to %s:%d', dstip, dstport);
