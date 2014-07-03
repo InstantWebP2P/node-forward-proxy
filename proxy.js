@@ -282,6 +282,7 @@ var Proxy = module.exports = function(options, fn){
 										        resErr("tunnel proxy, socket error: " + e);
 										    });
 										    
+										    if (Debug) console.log('req.headers: '+JSON.stringify(req.headers));
 										    // request on tunnel connection
 										    var toptions = {
 											              method: req.method,
@@ -362,7 +363,8 @@ var Proxy = module.exports = function(options, fn){
 									    // set turn-forward-to header: destination name-client's full vURL string
 									    roptions.headers = {};
 									    roptions.headers['turn-forward-to'] = vurle;
-									    								        // set SSL related options
+									    
+									    // set SSL related options
 								        // TBD...
 									    /*if (nmcln.secmode && nmcln.secerts) {
 									        Object.keys(nmcln.secerts).forEach(function(k){
@@ -536,7 +538,8 @@ var Proxy = module.exports = function(options, fn){
 						                // 6.
 						                // if req.url is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
-						                if (urle.match(vurle)) {
+						                // notes: disable it to avoid middle-man attack
+						                if (0/*urle.match(vurle)*/) {
 						                    // 6.1
 						                    // connect it directly						                    	            
 							                if (Debug) console.log('https proxy, httpp connect to %s:%d', dstip, dstport);
@@ -770,7 +773,8 @@ var Proxy = module.exports = function(options, fn){
 						                // 6.
 						                // if address:port is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
-						                if (urle.match(vurle)) {
+						                // notes: disable it to avoid middle-man attack
+						                if (0/*urle.match(vurle)*/) {
 						                    // 6.1
 						                    // connect it directly						                    	            
 							                if (Debug) console.log('socks proxy, httpp connect to %s:%d', dstip, dstport);
@@ -953,7 +957,7 @@ var Proxy = module.exports = function(options, fn){
 // TBD... geoip based algorithm for host/url
 Proxy.prototype.findExport = function(host, url){
     var self = this;
-    var rndm = Date.now();
+    var rndm = Math.ceil(Math.random() * 1000000);
     var vkey = [];
     
     // screen valid export 
@@ -1004,16 +1008,20 @@ Proxy.prototype.queryExport = function(fn){
 
 // Turn on/off export service query timer
 // - on: true or false
-// - timeout: optional, default is 6mins
+// - timeout: optional, default is 20s
 Proxy.prototype.turnQuerytimer = function(on, timeout){
     var self = this;
+    timeout = timeout || 20000;
     
     if (on && !self.qsInterval) {
         if (Debug) console.log('turn on export service query timemout '+timeout);
         
+        // query for the first time
+        self.queryExport();
+        
         self.qsInterval = setInterval(function(){
             self.queryExport();
-        }, timeout || 360000);
+        }, timeout);
     } else {
         if (self.qsInterval) {
             if (Debug) console.log('turn off export service query timer');
