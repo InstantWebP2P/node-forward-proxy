@@ -1,6 +1,8 @@
 // Copyright (c) 2013 Tom Zhou<iwebpp@gmail.com>
 
-var WEBPP = require('iwebpp.io'),
+var eventEmitter = require('events').EventEmitter,
+    util = require('util'),
+    WEBPP = require('iwebpp.io'),
     SEP = WEBPP.SEP,
     vURL = WEBPP.vURL,
     URL = require('url'),
@@ -41,6 +43,9 @@ var Proxy = module.exports = function(options, fn){
     var self = this;
        
     if (!(this instanceof Proxy)) return new Proxy(options, fn);
+    
+    // super constructor
+    eventEmitter.call(self);
     
     if (typeof options == 'function') {
         fn = options;
@@ -932,10 +937,10 @@ var Proxy = module.exports = function(options, fn){
         
         // 8.
 	    // pass forward proxy App
-	    fn(null, {
-	        importApp: {httpApp: {tunnel: importHttpTunnel, proxy: importHttpProxy}, socksApp: importSocksProxy},
-	        exportApp: {httpApp: {tunnel: exportHttpTunnel, proxy: exportHttpProxy}}
-	    });
+	    var papps = {importApp: {httpApp: {tunnel: importHttpTunnel, proxy: importHttpProxy}, socksApp: importSocksProxy},
+	    		     exportApp: {httpApp: {tunnel: exportHttpTunnel, proxy: exportHttpProxy}}};
+	    if (fn) fn(null, papps);
+	    self.emit('ready', papps);
 	});
 	
 	// 1.2
@@ -949,9 +954,12 @@ var Proxy = module.exports = function(options, fn){
         }
 	    
 	    console.log('name-client create failed:'+JSON.stringify(err));
-	    fn(err);
+	    if (fn) fn(err);
+	    self.emit('error', err);
 	});
 };
+
+util.inherits(Proxy, eventEmitter);
 
 // Choose an export service vURL
 // TBD... geoip based algorithm for host/url
