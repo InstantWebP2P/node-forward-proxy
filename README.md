@@ -7,6 +7,7 @@ p2p http and socks forward webproxy based on iWebPP.io and Node.js
 
 * http / socks proxy server as forward-proxy import service
 * http connect tunnel over iWebPP.io STUN session as forward-proxy export service
+* multi-hop relay over STUN session
 * secure p2p proxy tunnel to build user-defined webvpn service
 * high udp data transfer performance
 
