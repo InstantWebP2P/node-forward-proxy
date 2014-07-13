@@ -381,17 +381,17 @@ var Proxy = module.exports = function(options, fn){
 										rreq.end();
 										
 										rreq.on('error', function(e) {
-									        console.log("tunnel proxy, CONNECT request error: " + e);					        
-									        resErr("tunnel proxy, CONNECT request error: " + e);
+									        console.log("tunnel proxy over TURN, CONNECT request error: " + e);					        
+									        resErr("tunnel proxy over TURN, CONNECT request error: " + e);
 									    });
 									    
-										if (Debug) console.log('tunnel proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
+										if (Debug) console.log('tunnel proxy over TURN, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
 										rreq.on('connect', function(rres, rsocket, rhead) {
-										    if (Debug) console.log('tunnel proxy, got connected');
+										    if (Debug) console.log('tunnel proxy over TURN, got connected');
 										
 										    rsocket.on('error', function(e) {
-										        console.log("tunnel proxy, socket error: " + e);
-										        resErr("tunnel proxy, socket error: " + e);
+										        console.log("tunnel proxy over TURN, socket error: " + e);
+										        resErr("tunnel proxy over TURN, socket error: " + e);
 										    });
 										    
 										    // request on tunnel connection
@@ -410,7 +410,7 @@ var Proxy = module.exports = function(options, fn){
 									        };
 											
 											var treq = httpps.request(toptions, function(tres){
-											    if (Debug) console.log('tunnel proxy, got response, headers:'+JSON.stringify(tres.headers));
+											    if (Debug) console.log('tunnel proxy over TURN, got response, headers:'+JSON.stringify(tres.headers));
 											    
 											    // set headers
 											    Object.keys(tres.headers).forEach(function (key) {
@@ -421,13 +421,13 @@ var Proxy = module.exports = function(options, fn){
 											    tres.pipe(res);
 											    
 											    tres.on('error', function(e) {
-										            console.log("tunnel proxy, tunnel response error: " + e);					        
+										            console.log("tunnel proxy over TURN, tunnel response error: " + e);					        
 										            resErr("tunnel proxy, tunnel response error: " + e);
 									            });
 											});
 											treq.on('error', function(e) {
-										        console.log("tunnel proxy, tunnel request error: " + e);					        
-										        resErr("tunnel proxy, tunnel request error: " + e);
+										        console.log("tunnel proxy over TURN, tunnel request error: " + e);					        
+										        resErr("tunnel proxy over TURN, tunnel request error: " + e);
 									        });
 											req.pipe(treq);
 											req.on('error', resErr);
@@ -673,9 +673,10 @@ var Proxy = module.exports = function(options, fn){
 										var rreq = httpps.request(roptions);
 										rreq.end();
 										
-										if (Debug) console.log('tunnel proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
+										if (Debug) console.log('tunnel proxy over TURN, connect to %s:%d',
+												routing.turn.ipaddr, routing.turn.proxyport);
 										rreq.on('connect', function(rres, rsocket, rhead) {
-										    if (Debug) console.log('tunnel proxy, got connected');
+										    if (Debug) console.log('tunnel proxy over TURN, got connected');
 										
 										    socket.write('HTTP/1.1 200 Connection Established\r\n' +
 										                 'Proxy-agent: Node-Proxy\r\n' +
@@ -685,13 +686,13 @@ var Proxy = module.exports = function(options, fn){
 											socket.pipe(rsocket);
 											
 										    rsocket.on('error', function(e) {
-										        console.log("tunnel proxy, socket error: " + e);
+										        console.log("tunnel proxy over TURN, socket error: " + e);
 										        socket.end();
 										    });
 										});
 										
 										rreq.on('error', function(e) {
-									        console.log("tunnel proxy, CONNECT request error: " + e);					        
+									        console.log("tunnel proxy over TURN, CONNECT request error: " + e);					        
 									        socket.end();
 									    });
 						            }
@@ -906,9 +907,9 @@ var Proxy = module.exports = function(options, fn){
 										var rreq = httpps.request(roptions);
 										rreq.end();
 										
-										if (Debug) console.log('socks proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
+										if (Debug) console.log('socks proxy over TURN, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
 										rreq.on('connect', function(rres, rsocket, rhead) {
-										    if (Debug) console.log('socks proxy, got connected');
+										    if (Debug) console.log('socks proxy over TURN, got connected');
 										
 										    // send socks response      
 										    proxy_ready();
@@ -917,13 +918,13 @@ var Proxy = module.exports = function(options, fn){
 											socket.pipe(rsocket);
 											
 										    rsocket.on('error', function(e) {
-										        console.log("socks proxy, socket error: " + e);
+										        console.log("socks proxy over TURN, socket error: " + e);
 										        socket.end();
 										    });
 										});
 										
 										rreq.on('error', function(e) {
-									        console.log("socks proxy, CONNECT request error: " + e);					        
+									        console.log("socks proxy over TURN, CONNECT request error: " + e);					        
 									        socket.end();
 									    });
 						            }
