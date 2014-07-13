@@ -105,7 +105,7 @@ var Proxy = module.exports = function(options, fn){
 	    
 	    // 3.1
 	    // export http tunnel
-	    var exportHttpTunnel = function(req, socket, head){
+	    function exportHttpTunnel(req, socket, head){
 	        // 1.
 	        // find next hop in case middle relay using turn-forward-to headers
 	    	var middle = req.headers && req.headers['turn-forward-to'];
