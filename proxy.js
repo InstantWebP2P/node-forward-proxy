@@ -110,124 +110,140 @@ var Proxy = module.exports = function(options, fn){
 	        // find next hop in case middle relay using turn-forward-to headers
 	    	var middle = req.headers && req.headers['turn-forward-to'];
 	    			
-	        if (middle) {
-	            var relays = middle.split(',');
-	            var nxstep = relays[0];
-	            
-	            // 1.1
-	            // check on vURL
-	            var vstrs, vurle;
-	            if (vstrs = nxstep.match(vURL.regex_vboth)) {
-	            	vurle = vstrs[0];
-	            	
+	    	if (middle) {
+	    		var relays = middle.split(',');
+	    		var nxstep = relays[0];
+
+	    		// 1.1
+	    		// break loops
+	    		var loop = false;
+	    		var mine = nmcln.vurl.match(vURL.regex_vboth);
+	    		for (var idx = 0; idx < relays.length; idx ++)
+	    			if (mine === (relays[idx]).match(vURL.regex_vboth)) {
+	    				loop = true;
+	    				break;
+	    			}
+	    		if (loop) {
+	    			// stop on loop
+	    			socket.end('stop on loop');
+	    			console.error('stop on loop:'+nmcln.vurl);
+	    			return;
+	    		}
+
+	    		// 1.2
+	    		// check on vURL
+	    		var vstrs, vurle;
+	    		if (vstrs = nxstep.match(vURL.regex_vboth)) {
+	    			vurle = vstrs[0];
+
 	    			// 2.
-	            	// get peer info by vURL
-	    		    nmcln.getvURLInfo(vurle, function(err, routing){
-	    		        // 2.1
-	    		        // check error and authentication 
-	    		        if (err || !routing) {
-	    		            // invalid vURL
-	    	                socket.end('invalid URL');
-	    	                console.error('invalid URL:'+nxstep);
-	    		        } else {
-	    			        // 3.
-	    			        // check STUN alability
-	    			        nmcln.checkStunable(vurle, function(err, yes){
-	    			            if (err) {
-	    					        // invalid vURL
-	    	    	                socket.end('invalid URL');
-	    			                console.error('invalid URL:'+nxstep);
-	    			            } else {
-	    			                // over STUN
-	    			                if (yes) {
-	    						        // 5.
-	    						        // traverse STUN session to peer
-	    						        nmcln.trvsSTUN(vurle, function(err, stun){
-	    						            if (err || !stun) {
-	    							            // STUN not availabe
-	    					                    socket.end('STUN not available, please use TURN');
-	    					                    console.error('STUN not available:'+nxstep);
-	    						            } else {
-	    						            	// get peer endpoint
-	    						            	var dstip = stun.peerIP, dstport = stun.peerPort;
+	    			// get peer info by vURL
+	    			nmcln.getvURLInfo(vurle, function(err, routing){
+	    				// 2.1
+	    				// check error and authentication 
+	    				if (err || !routing) {
+	    					// invalid vURL
+	    					socket.end('invalid URL');
+	    					console.error('invalid URL:'+nxstep);
+	    				} else {
+	    					// 3.
+	    					// check STUN alability
+	    					nmcln.checkStunable(vurle, function(err, yes){
+	    						if (err) {
+	    							// invalid vURL
+	    							socket.end('invalid URL');
+	    							console.error('invalid URL:'+nxstep);
+	    						} else {
+	    							// over STUN
+	    							if (yes) {
+	    								// 5.
+	    								// traverse STUN session to peer
+	    								nmcln.trvsSTUN(vurle, function(err, stun){
+	    									if (err || !stun) {
+	    										// STUN not availabe
+	    										socket.end('STUN not available, please use TURN');
+	    										console.error('STUN not available:'+nxstep);
+	    									} else {
+	    										// get peer endpoint
+	    										var dstip = stun.peerIP, dstport = stun.peerPort;
 
-	    						            	// setup tunnel to target by make CONNECT request
-	    						            	var roptions = {
-	    						            			port: dstport,
-	    						            			hostname: dstip,
-	    						            			method: 'CONNECT',
-	    						            			path: req.url,
-	    						            			agent: false,
+	    										// setup tunnel to target by make CONNECT request
+	    										var roptions = {
+	    												port: dstport,
+	    												hostname: dstip,
+	    												method: 'CONNECT',
+	    												path: req.url,
+	    												agent: false,
 
-	    						            			// set user-specific feature,like maxim bandwidth,etc
-	    						            			localAddress: {
-	    						            				addr: nmcln.ipaddr,
-	    						            				port: nmcln.port, 
+	    												// set user-specific feature,like maxim bandwidth,etc
+	    												localAddress: {
+	    													addr: nmcln.ipaddr,
+	    													port: nmcln.port, 
 
-	    						            				opt: {
-	    						            					mbw: options.mbw || null
-	    						            				}
-	    						            			}
-	    						            	};
-	    						            	// set SSL related options
-	    						            	if (nmcln.secmode && nmcln.secerts) {
-	    						            		Object.keys(nmcln.secerts).forEach(function(k){
-	    						            			roptions[k] = nmcln.secerts[k];  
-	    						            		});
-	    						            	}
-	    						            	
-	    						            	// set turn-forward-to header for middle relays
-	    						            	if (relays.length > 1) {
-	    						            		var nmiddle = [];
-	    						            		for (var idx = 1; idx < relays.length; idx ++)
-	    						            			nmiddle.push(relays[idx]);
-	    						            		var going = nmiddle.join(',');
+	    													opt: {
+	    														mbw: options.mbw || null
+	    													}
+	    												}
+	    										};
+	    										// set SSL related options
+	    										if (nmcln.secmode && nmcln.secerts) {
+	    											Object.keys(nmcln.secerts).forEach(function(k){
+	    												roptions[k] = nmcln.secerts[k];  
+	    											});
+	    										}
 
-	    						            		roptions.headers = {};
-	    						            		roptions.headers['turn-forward-to'] = going;
-	    						            	}
-	    						            		            	
-	    						            	var rreq = httpps.request(roptions);
-	    						            	rreq.end();
+	    										// set turn-forward-to header for middle relays
+	    										if (relays.length > 1) {
+	    											var nmiddle = [];
+	    											for (var idx = 1; idx < relays.length; idx ++)
+	    												nmiddle.push(relays[idx]);
+	    											var going = nmiddle.join(',');
 
-	    						            	if (Debug) console.log('tunnel proxy relay, connect to %s:%d', dstip, dstport);
-	    						            	rreq.on('connect', function(rres, rsocket, rhead) {
-	    						            		if (Debug) console.log('tunnel proxy relay, got connected');
+	    											roptions.headers = {};
+	    											roptions.headers['turn-forward-to'] = going;
+	    										}
 
-	    						            		socket.write('HTTP/1.1 200 Connection Established\r\n' +
-	    						            				'Proxy-agent: Node-Proxy\r\n' +
-	    						            				'\r\n');
+	    										var rreq = httpps.request(roptions);
+	    										rreq.end();
 
-	    						            		rsocket.pipe(socket);
-	    						            		socket.pipe(rsocket);
+	    										if (Debug) console.log('tunnel proxy relay, connect to %s:%d', dstip, dstport);
+	    										rreq.on('connect', function(rres, rsocket, rhead) {
+	    											if (Debug) console.log('tunnel proxy relay, got connected');
 
-	    						            		rsocket.on('error', function(e) {
-	    						            			console.log("tunnel proxy relay, socket error: " + e);
-	    						            			socket.end();
-	    						            		});
-	    						            	});
+	    											socket.write('HTTP/1.1 200 Connection Established\r\n' +
+	    													'Proxy-agent: Node-Proxy\r\n' +
+	    													'\r\n');
 
-	    						            	rreq.on('error', function(e) {
-	    						            		console.log("tunnel proxy relay, CONNECT request error: " + e);					        
-	    						            		socket.end();
-	    						            	});
-	    						            }
-	    						        });		        
-	    			                } else {
-	    			                	// over TURN, not support for middle relays
-	    			                	socket.end('not support turn for middle relays '+nxstep);
-	    			                	console.error('not support turn for middle relays '+nxstep);
-	    			                }		        
-	    		                }
-	    		            });
-	    		        }
-	    	        });
-	            } else {
-			        // not reachable
-	                socket.end('not reachable');
-	                console.error('not reachable:'+nxstep);
-			    }
-	        } else {
+	    											rsocket.pipe(socket);
+	    											socket.pipe(rsocket);
+
+	    											rsocket.on('error', function(e) {
+	    												console.log("tunnel proxy relay, socket error: " + e);
+	    												socket.end();
+	    											});
+	    										});
+
+	    										rreq.on('error', function(e) {
+	    											console.log("tunnel proxy relay, CONNECT request error: " + e);					        
+	    											socket.end();
+	    										});
+	    									}
+	    								});		        
+	    							} else {
+	    								// over TURN, not support for middle relays
+	    								socket.end('not support turn for middle relays '+nxstep);
+	    								console.error('not support turn for middle relays '+nxstep);
+	    							}		        
+	    						}
+	    					});
+	    				}
+	    			});
+	    		} else {
+	    			// not reachable
+	    			socket.end('not reachable');
+	    			console.error('not reachable:'+nxstep);
+	    		}
+	    	} else {
 	            // 2.
 	        	// reach export
 	            var urls    = URL.parse('http://'+req.url, true, true);
