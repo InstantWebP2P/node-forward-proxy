@@ -12,7 +12,7 @@ var srv = new Proxy({export: 'https://9f34d25f045b34f1cc7f423e15c2b416.vurl.iweb
     var socks = require('socks5');
     var sockspxySrv = socks.createServer(importApp.socksApp);
     
-    sockspxySrv.listen(51888, 50);
+    sockspxySrv.listen(51888);
     
     sockspxySrv.on('error', function (e) {
         console.error('SERVER ERROR: %j', e);
@@ -21,7 +21,7 @@ var srv = new Proxy({export: 'https://9f34d25f045b34f1cc7f423e15c2b416.vurl.iweb
 	        setTimeout(function () {
 	            console.log('Reconnecting to %s:%s', HOST, PORT);
 	            sockspxySrv.close();
-	            sockspxySrv.listen(51888, 50);
+	            sockspxySrv.listen(51888);
 	        }, 10000);
 	    }
     });
