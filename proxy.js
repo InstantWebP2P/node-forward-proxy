@@ -83,12 +83,17 @@ var Proxy = module.exports = function(options, fn){
                 {ip: 'iwebpp.com', agent: 51866, proxy: 51688}
             ]
         },
-        
+
         // vURL mode: vhost-based
         vmode: vURL.URL_MODE_HOST, 
-        
+
         // secure mode
-        secmode: (options && options.secmode === 'ssl') ? SEP.SEP_SEC_SSL : SEP.SEP_SEC_SSL_ACL_HOST
+        secmode: (options && options.secmode === 'ssl') ? 
+        		SEP.SEP_SEC_SSL : SEP.SEP_SEC_SSL_ACL_HOST,
+
+        // ssl mode
+        sslmode: (options && options.sslmode === 'both') ?  
+        		SEP.SEP_SSL_AUTH_SRV_CLNT : SEP.SEP_SSL_AUTH_SRV_ONLY		
     });
 	
 	// 2.
@@ -677,7 +682,7 @@ var Proxy = module.exports = function(options, fn){
 						                // if req.url is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
 						                // notes: disable it to avoid middle-man attack
-						                if (0/*urle.match(vurle)*/) {
+						                if (urle.match(vurle)) {
 						                    // 6.1
 						                    // connect it directly						                    	            
 							                if (Debug) console.log('https proxy, httpp connect to %s:%d', dstip, dstport);
@@ -913,7 +918,7 @@ var Proxy = module.exports = function(options, fn){
 						                // if address:port is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
 						                // notes: disable it to avoid middle-man attack
-						                if (0/*urle.match(vurle)*/) {
+						                if (urle.match(vurle)) {
 						                    // 6.1
 						                    // connect it directly						                    	            
 							                if (Debug) console.log('socks proxy, httpp connect to %s:%d', dstip, dstport);
