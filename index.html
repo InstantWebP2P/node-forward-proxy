@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640">
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen">
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Node-forward-proxy by InstantWebP2P</title>
+  </head>
+
+  <body>
+    <a id="forkme_banner" href="https://github.com/InstantWebP2P/node-forward-proxy">View on GitHub</a>
+    <div class="shell">
+
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Node-forward-proxy</h1>
+            <h2>p2p http and socks forward webproxy based on iWebPP.io and Node.js</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/InstantWebP2P/node-forward-proxy/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/InstantWebP2P/node-forward-proxy/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
+        <h1>
+<a id="node-forward-proxy" class="anchor" href="#node-forward-proxy" aria-hidden="true"><span class="octicon octicon-link"></span></a>node-forward-proxy</h1>
+
+<p>p2p http and socks forward webproxy based on iWebPP.io and Node.js</p>
+
+<h3>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h3>
+
+<ul>
+<li>http / socks proxy server as forward-proxy import service</li>
+<li>http connect tunnel over iWebPP.io STUN session as forward-proxy export service</li>
+<li>multi-hop relay over STUN session</li>
+<li>secure p2p proxy tunnel to build user-defined webvpn service</li>
+<li>high udp data transfer performance</li>
+</ul>
+
+<h3>
+<a id="install-manually" class="anchor" href="#install-manually" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install manually</h3>
+
+<ul>
+<li>npm install forward-proxy, or git clone <a href="https://github.com/InstantWebP2P/forward-proxy.git">https://github.com/InstantWebP2P/forward-proxy.git</a> &amp;&amp; cd forward-proxy &amp;&amp; npm install</li>
+<li>forward-proxy depend on node-httpp, please npm install httpp-binary.if the binary didn't work, just build it from source:
+<a href="https://github.com/InstantWebP2P/node-httpp">https://github.com/InstantWebP2P/node-httpp</a>
+</li>
+</ul>
+
+<h3>
+<a id="install-with-prebuilt-packages-just-download-and-unzip-it" class="anchor" href="#install-with-prebuilt-packages-just-download-and-unzip-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install with prebuilt packages, just download and unzip it</h3>
+
+<ul>
+<li>windows package - <a href="https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-windows.zip">https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-windows.zip</a>
+</li>
+<li>OSx package - <a href="https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-osx.zip">https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-osx.zip</a>
+</li>
+<li>Linux x86 package - <a href="https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux32.zip">https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux32.zip</a>
+</li>
+<li>Linux x86_64 package - <a href="https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux64.zip">https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux64.zip</a>
+</li>
+<li>RaspberryPi package - <a href="https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-pi.zip">https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-pi.zip</a>
+</li>
+</ul>
+
+<h3>
+<a id="usageapi" class="anchor" href="#usageapi" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage/API</h3>
+
+<ul>
+<li>for export service, refer to demo/export.js. to start it, just node demo/export.js</li>
+<li>for http proxy server, refer to demo/webproxy.js. to start it, just node demo/webproxy.js</li>
+<li>for socks proxy server, refer to demo/socksproxy.js. to start it, just node demo/export.js</li>
+<li>for http/socks server, please fill export service vURL in options.export, when create Proxy instance</li>
+<li>web browser is http proxy / socks proxy client</li>
+<li>after setup export service and start http or socks server, then set web browser proxy settings point to http/socks server</li>
+<li>for forward-proxy util, refer to bin/forward-proxy. to start it, just node bin/forward-proxy --key usrkey(MUST) --http_port xxx --socks_port xxx --export_vurl vURL --enable_export</li>
+<li>export/import service's usrkey MUST same</li>
+</ul>
+
+<p><br></p>
+
+<h3>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h3>
+
+<p>(The MIT License)</p>
+
+<p>Copyright (c) 2012-2013 Tom Zhou(<a href="mailto:iwebpp@gmail.com">iwebpp@gmail.com</a>)</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+      </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/InstantWebP2P">InstantWebP2P</a> can be found on <a href="https://github.com/InstantWebP2P/node-forward-proxy">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
