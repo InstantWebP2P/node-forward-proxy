@@ -7,6 +7,7 @@ p2p http and socks forward webproxy based on iWebPP.io and Node.js
 
 * http / socks proxy server as forward-proxy import service
 * http connect tunnel over iWebPP.io STUN session as forward-proxy export service
+* multi-hop relay over STUN session
 * secure p2p proxy tunnel to build user-defined webvpn service
 * high udp data transfer performance
 
@@ -18,6 +19,9 @@ p2p http and socks forward webproxy based on iWebPP.io and Node.js
 ### Install with prebuilt packages, just download and unzip it
 * windows package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-windows.zip
 * OSx package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-osx.zip
+* Linux x86 package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux32.zip
+* Linux x86_64 package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux64.zip
+* RaspberryPi package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-pi.zip
 
 ### Usage/API
 * for export service, refer to demo/export.js. to start it, just node demo/export.js
