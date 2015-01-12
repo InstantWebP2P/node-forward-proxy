@@ -67,16 +67,16 @@ var prxy = new Proxy({export: export_vurl, usrkey: usrkey,
         // query available export service firstly
         prxy.queryExport(function(err, srv){
             if (err || !srv) {
-                console.log('No available export service, please run export service in advance');
-            } else {
-                console.log('%d available export services', Object.keys(srv).length);
+                console.log('Warning: No available export service, please run export service in advance');
+            } /*else*/ {
+                ///console.log('%d available export services', Object.keys(srv).length);
                 
                 // start socks proxy service
 			    if (socks_port) {
 				    var socks = require('socks5');
 				    var sockspxySrv = socks.createServer(importApp.socksApp);
 				    
-				    sockspxySrv.listen(socks_port, 50);
+				    sockspxySrv.listen(socks_port);
 				    
 				    sockspxySrv.on('error', function (e) {
 				        console.error('SERVER ERROR: %j', e);
@@ -102,7 +102,7 @@ var prxy = new Proxy({export: export_vurl, usrkey: usrkey,
 				    pxySrv.on('request', importApp.httpApp.proxy);
 				    pxySrv.on('connect', importApp.httpApp.tunnel);
 				    
-				    pxySrv.listen(http_port, 50);
+				    pxySrv.listen(http_port);
 				    
 				    console.log('Http forwar proxy server listen on port '+http_port);
 				    console.log('You can set browser HTTP proxy settings point to 127.0.0.1:'+http_port);

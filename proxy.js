@@ -1,6 +1,8 @@
 // Copyright (c) 2013 Tom Zhou<iwebpp@gmail.com>
 
-var WEBPP = require('iwebpp.io'),
+var eventEmitter = require('events').EventEmitter,
+    util = require('util'),
+    WEBPP = require('iwebpp.io'),
     SEP = WEBPP.SEP,
     vURL = WEBPP.vURL,
     URL = require('url'),
@@ -42,6 +44,9 @@ var Proxy = module.exports = function(options, fn){
        
     if (!(this instanceof Proxy)) return new Proxy(options, fn);
     
+    // super constructor
+    eventEmitter.call(self);
+    
     if (typeof options == 'function') {
         fn = options;
         options = {};
@@ -78,12 +83,17 @@ var Proxy = module.exports = function(options, fn){
                 {ip: 'iwebpp.com', agent: 51866, proxy: 51688}
             ]
         },
-        
+
         // vURL mode: vhost-based
         vmode: vURL.URL_MODE_HOST, 
-        
+
         // secure mode
-        secmode: (options && options.secmode === 'ssl') ? SEP.SEP_SEC_SSL : SEP.SEP_SEC_SSL_ACL_HOST
+        secmode: (options && options.secmode === 'ssl') ? 
+        		SEP.SEP_SEC_SSL : SEP.SEP_SEC_SSL_ACL_HOST,
+
+        // ssl mode
+        sslmode: (options && options.sslmode === 'both') ?  
+        		SEP.SEP_SSL_AUTH_SRV_CLNT : SEP.SEP_SSL_AUTH_SRV_ONLY		
     });
 	
 	// 2.
@@ -100,14 +110,147 @@ var Proxy = module.exports = function(options, fn){
 	    
 	    // 3.1
 	    // export http tunnel
-	    var exportHttpTunnel = function(req, socket, head){
-	        // 6.1
-	        // find next hop in case middle
-	        // TBD...
-	        if (0) {
-	        
-	        } else {
-	            // reach export
+	    function exportHttpTunnel(req, socket, head){
+	        // 1.
+	        // find next hop in case middle relay using turn-forward-to headers
+	    	var middle = req.headers && req.headers['turn-forward-to'];
+	    			
+	    	if (middle) {
+	    		var relays = middle.split(',');
+	    		var nxstep = relays[0];
+
+	    		// 1.1
+	    		// break loops
+	    		var loop = false;
+	    		var mine = nmcln.vurl.match(vURL.regex_vboth);
+	    		for (var idx = 0; idx < relays.length; idx ++)
+	    			if (mine === (relays[idx]).match(vURL.regex_vboth)) {
+	    				loop = true;
+	    				break;
+	    			}
+	    		if (loop) {
+	    			// stop on loop
+	    			socket.end('stop on loop');
+	    			console.error('stop on loop:'+nmcln.vurl);
+	    			return;
+	    		}
+
+	    		// 1.2
+	    		// check on vURL
+	    		var vstrs, vurle;
+	    		if (vstrs = nxstep.match(vURL.regex_vboth)) {
+	    			vurle = vstrs[0];
+
+	    			// 2.
+	    			// get peer info by vURL
+	    			nmcln.getvURLInfo(vurle, function(err, routing){
+	    				// 2.1
+	    				// check error and authentication 
+	    				if (err || !routing) {
+	    					// invalid vURL
+	    					socket.end('invalid URL');
+	    					console.error('invalid URL:'+nxstep);
+	    				} else {
+	    					// 3.
+	    					// check STUN alability
+	    					nmcln.checkStunable(vurle, function(err, yes){
+	    						if (err) {
+	    							// invalid vURL
+	    							socket.end('invalid URL');
+	    							console.error('invalid URL:'+nxstep);
+	    						} else {
+	    							// over STUN
+	    							if (yes) {
+	    								// 5.
+	    								// traverse STUN session to peer
+	    								nmcln.trvsSTUN(vurle, function(err, stun){
+	    									if (err || !stun) {
+	    										// STUN not availabe
+	    										socket.end('STUN not available, please use TURN');
+	    										console.error('STUN not available:'+nxstep);
+	    									} else {
+	    										// get peer endpoint
+	    										var dstip = stun.peerIP, dstport = stun.peerPort;
+
+	    										// setup tunnel to target by make CONNECT request
+	    										var roptions = {
+	    												port: dstport,
+	    												hostname: dstip,
+	    												method: 'CONNECT',
+	    												path: req.url,
+	    												agent: false,
+
+	    												// set user-specific feature,like maxim bandwidth,etc
+	    												localAddress: {
+	    													addr: nmcln.ipaddr,
+	    													port: nmcln.port, 
+
+	    													opt: {
+	    														mbw: options.mbw || null
+	    													}
+	    												}
+	    										};
+	    										// set SSL related options
+	    										if (nmcln.secmode && nmcln.secerts) {
+	    											Object.keys(nmcln.secerts).forEach(function(k){
+	    												roptions[k] = nmcln.secerts[k];  
+	    											});
+	    										}
+
+	    										// set turn-forward-to header for middle relays
+	    										if (relays.length > 1) {
+	    											var nmiddle = [];
+	    											for (var idx = 1; idx < relays.length; idx ++)
+	    												nmiddle.push(relays[idx]);
+	    											var going = nmiddle.join(',');
+
+	    											roptions.headers = {};
+	    											roptions.headers['turn-forward-to'] = going;
+	    										}
+
+	    										var rreq = httpps.request(roptions);
+	    										rreq.end();
+
+	    										if (Debug) console.log('tunnel proxy relay, connect to %s:%d', dstip, dstport);
+	    										rreq.on('connect', function(rres, rsocket, rhead) {
+	    											if (Debug) console.log('tunnel proxy relay, got connected');
+
+	    											socket.write('HTTP/1.1 200 Connection Established\r\n' +
+	    													'Proxy-agent: Node-Proxy\r\n' +
+	    													'\r\n');
+
+	    											rsocket.pipe(socket);
+	    											socket.pipe(rsocket);
+
+	    											rsocket.on('error', function(e) {
+	    												console.log("tunnel proxy relay, socket error: " + e);
+	    												socket.end();
+	    											});
+	    										});
+
+	    										rreq.on('error', function(e) {
+	    											console.log("tunnel proxy relay, CONNECT request error: " + e);					        
+	    											socket.end();
+	    										});
+	    									}
+	    								});		        
+	    							} else {
+	    								// over TURN, not support for middle relays
+	    								socket.end('not support turn for middle relays '+nxstep);
+	    								console.error('not support turn for middle relays '+nxstep);
+	    							}		        
+	    						}
+	    					});
+	    				}
+	    			});
+	    		} else {
+	    			// not reachable
+	    			socket.end('not reachable');
+	    			console.error('not reachable:'+nxstep);
+	    		}
+	    	} else {
+	            // 2.
+	        	// reach export
 	            var urls    = URL.parse('http://'+req.url, true, true);
 	            var srvip   = urls.hostname;
 	            var srvport = urls.port || 443;
@@ -282,6 +425,7 @@ var Proxy = module.exports = function(options, fn){
 										        resErr("tunnel proxy, socket error: " + e);
 										    });
 										    
+										    if (Debug) console.log('req.headers: '+JSON.stringify(req.headers));
 										    // request on tunnel connection
 										    var toptions = {
 											              method: req.method,
@@ -362,7 +506,8 @@ var Proxy = module.exports = function(options, fn){
 									    // set turn-forward-to header: destination name-client's full vURL string
 									    roptions.headers = {};
 									    roptions.headers['turn-forward-to'] = vurle;
-									    								        // set SSL related options
+									    
+									    // set SSL related options
 								        // TBD...
 									    /*if (nmcln.secmode && nmcln.secerts) {
 									        Object.keys(nmcln.secerts).forEach(function(k){
@@ -374,17 +519,17 @@ var Proxy = module.exports = function(options, fn){
 										rreq.end();
 										
 										rreq.on('error', function(e) {
-									        console.log("tunnel proxy, CONNECT request error: " + e);					        
-									        resErr("tunnel proxy, CONNECT request error: " + e);
+									        console.log("tunnel proxy over TURN, CONNECT request error: " + e);					        
+									        resErr("tunnel proxy over TURN, CONNECT request error: " + e);
 									    });
 									    
-										if (Debug) console.log('tunnel proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
+										if (Debug) console.log('tunnel proxy over TURN, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
 										rreq.on('connect', function(rres, rsocket, rhead) {
-										    if (Debug) console.log('tunnel proxy, got connected');
+										    if (Debug) console.log('tunnel proxy over TURN, got connected');
 										
 										    rsocket.on('error', function(e) {
-										        console.log("tunnel proxy, socket error: " + e);
-										        resErr("tunnel proxy, socket error: " + e);
+										        console.log("tunnel proxy over TURN, socket error: " + e);
+										        resErr("tunnel proxy over TURN, socket error: " + e);
 										    });
 										    
 										    // request on tunnel connection
@@ -403,7 +548,7 @@ var Proxy = module.exports = function(options, fn){
 									        };
 											
 											var treq = httpps.request(toptions, function(tres){
-											    if (Debug) console.log('tunnel proxy, got response, headers:'+JSON.stringify(tres.headers));
+											    if (Debug) console.log('tunnel proxy over TURN, got response, headers:'+JSON.stringify(tres.headers));
 											    
 											    // set headers
 											    Object.keys(tres.headers).forEach(function (key) {
@@ -414,13 +559,13 @@ var Proxy = module.exports = function(options, fn){
 											    tres.pipe(res);
 											    
 											    tres.on('error', function(e) {
-										            console.log("tunnel proxy, tunnel response error: " + e);					        
+										            console.log("tunnel proxy over TURN, tunnel response error: " + e);					        
 										            resErr("tunnel proxy, tunnel response error: " + e);
 									            });
 											});
 											treq.on('error', function(e) {
-										        console.log("tunnel proxy, tunnel request error: " + e);					        
-										        resErr("tunnel proxy, tunnel request error: " + e);
+										        console.log("tunnel proxy over TURN, tunnel request error: " + e);					        
+										        resErr("tunnel proxy over TURN, tunnel request error: " + e);
 									        });
 											req.pipe(treq);
 											req.on('error', resErr);
@@ -536,6 +681,7 @@ var Proxy = module.exports = function(options, fn){
 						                // 6.
 						                // if req.url is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
+						                // notes: disable it to avoid middle-man attack
 						                if (urle.match(vurle)) {
 						                    // 6.1
 						                    // connect it directly						                    	            
@@ -665,9 +811,10 @@ var Proxy = module.exports = function(options, fn){
 										var rreq = httpps.request(roptions);
 										rreq.end();
 										
-										if (Debug) console.log('tunnel proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
+										if (Debug) console.log('tunnel proxy over TURN, connect to %s:%d',
+												routing.turn.ipaddr, routing.turn.proxyport);
 										rreq.on('connect', function(rres, rsocket, rhead) {
-										    if (Debug) console.log('tunnel proxy, got connected');
+										    if (Debug) console.log('tunnel proxy over TURN, got connected');
 										
 										    socket.write('HTTP/1.1 200 Connection Established\r\n' +
 										                 'Proxy-agent: Node-Proxy\r\n' +
@@ -677,13 +824,13 @@ var Proxy = module.exports = function(options, fn){
 											socket.pipe(rsocket);
 											
 										    rsocket.on('error', function(e) {
-										        console.log("tunnel proxy, socket error: " + e);
+										        console.log("tunnel proxy over TURN, socket error: " + e);
 										        socket.end();
 										    });
 										});
 										
 										rreq.on('error', function(e) {
-									        console.log("tunnel proxy, CONNECT request error: " + e);					        
+									        console.log("tunnel proxy over TURN, CONNECT request error: " + e);					        
 									        socket.end();
 									    });
 						            }
@@ -770,6 +917,7 @@ var Proxy = module.exports = function(options, fn){
 						                // 6.
 						                // if address:port is valid vURL, connect it directly,
 						                // otherwise do CONNECT tunnel over export vURL 
+						                // notes: disable it to avoid middle-man attack
 						                if (urle.match(vurle)) {
 						                    // 6.1
 						                    // connect it directly						                    	            
@@ -897,9 +1045,9 @@ var Proxy = module.exports = function(options, fn){
 										var rreq = httpps.request(roptions);
 										rreq.end();
 										
-										if (Debug) console.log('socks proxy, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
+										if (Debug) console.log('socks proxy over TURN, connect to %s:%d', routing.turn.ipaddr, routing.turn.proxyport);
 										rreq.on('connect', function(rres, rsocket, rhead) {
-										    if (Debug) console.log('socks proxy, got connected');
+										    if (Debug) console.log('socks proxy over TURN, got connected');
 										
 										    // send socks response      
 										    proxy_ready();
@@ -908,13 +1056,13 @@ var Proxy = module.exports = function(options, fn){
 											socket.pipe(rsocket);
 											
 										    rsocket.on('error', function(e) {
-										        console.log("socks proxy, socket error: " + e);
+										        console.log("socks proxy over TURN, socket error: " + e);
 										        socket.end();
 										    });
 										});
 										
 										rreq.on('error', function(e) {
-									        console.log("socks proxy, CONNECT request error: " + e);					        
+									        console.log("socks proxy over TURN, CONNECT request error: " + e);					        
 									        socket.end();
 									    });
 						            }
@@ -928,10 +1076,10 @@ var Proxy = module.exports = function(options, fn){
         
         // 8.
 	    // pass forward proxy App
-	    fn(null, {
-	        importApp: {httpApp: {tunnel: importHttpTunnel, proxy: importHttpProxy}, socksApp: importSocksProxy},
-	        exportApp: {httpApp: {tunnel: exportHttpTunnel, proxy: exportHttpProxy}}
-	    });
+	    var papps = {importApp: {httpApp: {tunnel: importHttpTunnel, proxy: importHttpProxy}, socksApp: importSocksProxy},
+	    		     exportApp: {httpApp: {tunnel: exportHttpTunnel, proxy: exportHttpProxy}}};
+	    if (fn) fn(null, papps);
+	    self.emit('ready', papps);
 	});
 	
 	// 1.2
@@ -945,9 +1093,12 @@ var Proxy = module.exports = function(options, fn){
         }
 	    
 	    console.log('name-client create failed:'+JSON.stringify(err));
-	    fn(err);
+	    if (fn) fn(err);
+	    self.emit('error', err);
 	});
 };
+
+util.inherits(Proxy, eventEmitter);
 
 // Choose an export service vURL
 // TBD... geoip based algorithm for host/url
@@ -1004,16 +1155,20 @@ Proxy.prototype.queryExport = function(fn){
 
 // Turn on/off export service query timer
 // - on: true or false
-// - timeout: optional, default is 6mins
+// - timeout: optional, default is 20s
 Proxy.prototype.turnQuerytimer = function(on, timeout){
     var self = this;
+    timeout = timeout || 20000;
     
     if (on && !self.qsInterval) {
         if (Debug) console.log('turn on export service query timemout '+timeout);
         
+        // query for the first time
+        self.queryExport();
+        
         self.qsInterval = setInterval(function(){
             self.queryExport();
-        }, timeout || 360000);
+        }, timeout);
     } else {
         if (self.qsInterval) {
             if (Debug) console.log('turn off export service query timer');
