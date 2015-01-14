@@ -448,14 +448,18 @@ var Proxy = module.exports = function(options, fn){
 											    Object.keys(tres.headers).forEach(function (key) {
 											      res.setHeader(key, tres.headers[key]);
 											    });
-											    res.writeHead(tres.statusCode);
-											    
-											    tres.pipe(res);
-											    
-											    tres.on('error', function(e) {
-										            console.log("tunnel proxy, tunnel response error: " + e);					        
-										            resErr("tunnel proxy, tunnel response error: " + e);
-									            });
+											    try {
+											    	res.writeHead(tres.statusCode);
+
+											    	tres.pipe(res);
+
+											    	tres.on('error', function(e) {
+											    		console.log("tunnel proxy, tunnel response error: " + e);					        
+											    		resErr("tunnel proxy, tunnel response error: " + e);
+											    	});
+											    } catch (e) {
+											    	console.log("tunnel proxy, tunnel response exception: " + e);					        
+											    }
 											});
 											treq.on('error', function(e) {
 										        console.log("tunnel proxy, tunnel request error: " + e);					        
@@ -554,14 +558,18 @@ var Proxy = module.exports = function(options, fn){
 											    Object.keys(tres.headers).forEach(function (key) {
 											      res.setHeader(key, tres.headers[key]);
 											    });
-											    res.writeHead(tres.statusCode);
-											    
-											    tres.pipe(res);
-											    
-											    tres.on('error', function(e) {
-										            console.log("tunnel proxy over TURN, tunnel response error: " + e);					        
-										            resErr("tunnel proxy, tunnel response error: " + e);
-									            });
+											    try {
+											    	res.writeHead(tres.statusCode);
+
+											    	tres.pipe(res);
+
+											    	tres.on('error', function(e) {
+											    		console.log("tunnel proxy over TURN, tunnel response error: " + e);					        
+											    		resErr("tunnel proxy, tunnel response error: " + e);
+											    	});
+											    } catch (e) {
+											    	console.log("tunnel proxy over TURN, tunnel response exception: " + e);					        
+											    }
 											});
 											treq.on('error', function(e) {
 										        console.log("tunnel proxy over TURN, tunnel request error: " + e);					        
