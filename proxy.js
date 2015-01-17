@@ -1127,7 +1127,9 @@ Proxy.prototype.findExport = function(host, url){
     				vkey.push(k);
     		} else {
     			// TBD... filter on rest
-    			vkey.push(k);
+    			if (self.exportCache[k].geoip &&
+    				self.exportCache[k].geoip.country != 'CN')
+    				vkey.push(k);
     		}
     });
     if (Debug) console.log('vkey: '+JSON.stringify(vkey));
