@@ -9,6 +9,7 @@ var eventEmitter = require('events').EventEmitter,
     NET = require('net'),
     UDT = require('udt'),
     httpps = require('httpps'),
+    filter = require('./filter');
     OS = require('os'); // for network interface check;
 
 
@@ -1114,10 +1115,20 @@ Proxy.prototype.findExport = function(host, url){
     var self = this;
     var rndm = Math.ceil(Math.random() * 1000000);
     var vkey = [];
+    var isCN = filter.isCN(host && (host.split(':'))[0], url);
     
-    // screen valid export 
+    // screen valid export
     Object.keys(self.exportCache).forEach(function(k){
-        if (self.exportCache[k]) vkey.push(k);
+    	if (self.exportCache[k]) 
+    		// filter CN site
+    		if (isCN) {
+    			if (self.exportCache[k].geoip &&
+    				self.exportCache[k].geoip.country === 'CN')
+    				vkey.push(k);
+    		} else {
+    			// TBD... filter on rest
+    			vkey.push(k);
+    		}
     });
     if (Debug) console.log('vkey: '+JSON.stringify(vkey));
     
