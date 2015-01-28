@@ -1178,26 +1178,31 @@ Proxy.prototype.queryExport = function(fn){
 // - on: true or false
 // - timeout: optional, default is 20s
 Proxy.prototype.turnQuerytimer = function(on, timeout){
-    var self = this;
-    timeout = timeout || 20000;
-    
-    if (on && !self.qsInterval) {
-        if (Debug) console.log('turn on export service query timemout '+timeout);
-        
-        // query for the first time
-        self.queryExport();
-        
-        self.qsInterval = setInterval(function(){
-            self.queryExport();
-        }, timeout);
-    } else {
-        if (self.qsInterval) {
-            if (Debug) console.log('turn off export service query timer');
-            
-            clearInterval(self.qsInterval);
-            self.qsInterval = null;
-        }
-    }
-    
-    return self;
+	var self = this;
+	timeout = timeout || 20000;
+
+	if (on && !self.qsInterval) {
+		if (Debug) console.log('turn on export service query timemout '+timeout);
+
+		// query for the first time
+		self.queryExport();
+
+		// delayed query for the second time after 6s
+		setTimeout(function() {
+			self.queryExport();
+
+			self.qsInterval = setInterval(function(){
+				self.queryExport();
+			}, timeout);
+		}, 6000); // 6s delay
+	} else {
+		if (self.qsInterval) {
+			if (Debug) console.log('turn off export service query timer');
+
+			clearInterval(self.qsInterval);
+			self.qsInterval = null;
+		}
+	}
+
+	return self;
 };
