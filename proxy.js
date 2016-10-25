@@ -445,12 +445,12 @@ var Proxy = module.exports = function(options, fn){
 											var treq = httpps.request(toptions, function(tres){
 											    if (Debug) console.log('tunnel proxy, got response, headers:'+JSON.stringify(tres.headers));
 											    
-											    // set headers
-											    Object.keys(tres.headers).forEach(function (key) {
-											      res.setHeader(key, tres.headers[key]);
-											    });
 											    try {
-											    	res.writeHead(tres.statusCode);
+													 // set headers
+													Object.keys(tres.headers).forEach(function (key) {
+														res.setHeader(key, tres.headers[key]);
+													});
+													res.writeHead(tres.statusCode);
 
 											    	tres.pipe(res);
 
