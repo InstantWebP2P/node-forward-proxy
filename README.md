@@ -12,16 +12,15 @@ p2p http and socks forward webproxy based on iWebPP.io and Node.js
 * high udp data transfer performance
 
 ### Install manually
-* npm install forward-proxy, or git clone https://github.com/InstantWebP2P/forward-proxy.git && cd forward-proxy && npm install
-* forward-proxy depend on node-httpp, please npm install httpp-binary.if the binary didn't work, just build it from source:
-  https://github.com/InstantWebP2P/node-httpp
+* npm install forward-proxy, or git clone [forward-proxy](https://github.com/InstantWebP2P/forward-proxy.git) && cd forward-proxy && npm install
+* forward-proxy depend on node-httpp, just build [node-httpp](https://github.com/InstantWebP2P/node-httpp)
 
 ### Install with prebuilt packages, just download and unzip it
-* windows package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-windows.zip
-* OSx package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-osx.zip
-* Linux x86 package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux32.zip
-* Linux x86_64 package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux64.zip
-* RaspberryPi package - https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-pi.zip
+* [Windows package](https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-windows.zip)
+* [OSx package](https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-osx.zip)
+* [Linux x86 package](https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux32.zip)
+* [Linux x86_64 package](https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-linux64.zip)
+* [RaspberryPi package](https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-pi.zip)
 
 ### Usage/API
 * for export service, refer to demo/export.js. to start it, just node demo/export.js
@@ -38,7 +37,7 @@ p2p http and socks forward webproxy based on iWebPP.io and Node.js
 
 (The MIT License)
 
-Copyright (c) 2012-2016 Tom Zhou(iwebpp@gmail.com)
+Copyright (c) 2012-present Tom Zhou(iwebpp@gmail.com)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
