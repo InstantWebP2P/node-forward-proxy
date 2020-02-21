@@ -13,7 +13,8 @@ p2p http and socks forward webproxy based on iWebPP.io and Node.js
 
 ### Install manually
 * npm install forward-proxy, or git clone [forward-proxy](https://github.com/InstantWebP2P/forward-proxy.git) && cd forward-proxy && npm install
-* forward-proxy depend on node-httpp, just build [node-httpp](https://github.com/InstantWebP2P/node-httpp)
+* forward-proxy depend on node-httpp, just build it from repo [node-httpp](https://github.com/InstantWebP2P/node-httpp)
+* setup your own iWebPP.io backend controller services refer to [iWebPP.io-controller](https://github.com/InstantWebP2P/iwebpp.io-controller)
 
 ### Install with prebuilt packages, just download and unzip it
 * [Windows package](https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-windows.zip)
