@@ -2,7 +2,7 @@
   "author": "Tom Zhou <iwebpp@gmail.com>",
   "name": "forward-proxy",
   "description": "p2p http forward and socks proxy based on iWebPP.io and Node.js",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/InstantWebP2P/node-forward-proxy.git"
@@ -26,7 +26,7 @@
   "dependencies": {
     "iwebpp.io": "latest",
     "socks5": "0.2.x",
-    "commander": "~1.1.1",
+    "commander": "1.1.1",
     "optimist": "0.3.x"
   }
 }
