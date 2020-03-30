@@ -6,7 +6,7 @@ P2P HTTP and SOCKS forward webproxy based on [AppNet.io](https://github.com/Inst
 ### Features
 
 * HTTP / SOCKS proxy server as forward-proxy import service
-* HTTP CONNECT tunnel over [AppNet.io STUN](https://github.com/InstantWebP2P/appnet.io-stun-proxy) session as forward-proxy export service
+* HTTP CONNECT tunnel over AppNet.io STUN session as forward-proxy export service
 * multi-hop relay over STUN session
 * secure P2P proxy tunnel to build user-defined WebVPN service
 * high UDP data transfer performance
