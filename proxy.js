@@ -2,7 +2,7 @@
 
 var eventEmitter = require('events').EventEmitter,
     util = require('util'),
-    WEBPP = require('iwebpp.io'),
+    WEBPP = require('appnet.io'),
     SEP = WEBPP.SEP,
     vURL = WEBPP.vURL,
     URL = require('url'),
