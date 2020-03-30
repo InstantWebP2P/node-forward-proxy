@@ -1,7 +1,7 @@
 {
   "author": "Tom Zhou <iwebpp@gmail.com> (https://aiworkspace.com)",
   "name": "forward-proxy",
-  "description": "p2p http forward and socks proxy based on iWebPP.io and Node.js",
+  "description": "p2p http forward and socks proxy based on AppNet.io and Node.js",
   "version": "3.2.1",
   "repository": {
     "type": "git",
