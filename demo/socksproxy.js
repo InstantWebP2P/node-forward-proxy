@@ -16,14 +16,14 @@ var srv = new Proxy({export: 'https://9f34d25f045b34f1cc7f423e15c2b416.vurl.51de
     
     sockspxySrv.on('error', function (e) {
         console.error('SERVER ERROR: %j', e);
-	    if (e.code == 'EADDRINUSE') {
-	        console.log('Address in use, retrying in 10 seconds...');
-	        setTimeout(function () {
-	            console.log('Reconnecting to %s:%s', HOST, PORT);
-	            sockspxySrv.close();
-	            sockspxySrv.listen(51888);
-	        }, 10000);
-	    }
+        if (e.code == 'EADDRINUSE') {
+            console.log('Address in use, retrying in 10 seconds...');
+            setTimeout(function () {
+                console.log('Reconnecting to %s:%s', HOST, PORT);
+                sockspxySrv.close();
+                sockspxySrv.listen(51888);
+            }, 10000);
+        }
     });
     console.log('Socks forward proxy server listen on port 51888');
 });

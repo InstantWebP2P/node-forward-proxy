@@ -1147,27 +1147,27 @@ var RULES_CN = [
 ];
 
 function isDomain(domain, host) {
-	var host_length, domain_length;
-	return ((domain[0] === '.') ? 
-			(host === domain.slice(1) || 
-			((host_length = host.length) >= 
-			(domain_length = domain.length) && 
-			 host.slice(host_length - domain_length) === domain)) : 
-			(host === domain));
+    var host_length, domain_length;
+    return ((domain[0] === '.') ? 
+            (host === domain.slice(1) || 
+            ((host_length = host.length) >= 
+            (domain_length = domain.length) && 
+             host.slice(host_length - domain_length) === domain)) : 
+            (host === domain));
 }
 
 // check on CN sites
 // TBD ... check on geoIP
 module.exports.isCN = function(host, url) {
-	for (var j = 0; j < RULES_CN.length; j++) {
-		var rules = RULES_CN[j];
+    for (var j = 0; j < RULES_CN.length; j++) {
+        var rules = RULES_CN[j];
 
-		for (var i = 0; i < rules.length; i++) {
-			if (isDomain(rules[i], host) === true) {
-				return true;
-			}
-		} 
-	}
+        for (var i = 0; i < rules.length; i++) {
+            if (isDomain(rules[i], host) === true) {
+                return true;
+            }
+        } 
+    }
 
-	return false;
+    return false;
 };
