@@ -34,7 +34,7 @@ function isLocalintf(host){
 var Debug = 0;
 
 // Proxy class
-// a proxy will contain one iwebpp.io name-client
+// a proxy will contain one appnet.io name-client
 // - options: user custom parameters, like {secmode: ..., usrkey: ..., domain: ..., endpoints: ..., turn: ...}
 // - options.secmode: ssl, enable ssl/https; acl, enable ssl/https,host-based ACL
 // - options.export: Forward-proxy's Export service vURL
