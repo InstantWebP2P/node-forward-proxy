@@ -1,7 +1,7 @@
 node-forward-proxy
 ===============
 
-P2P HTTP and SOCKS forward webproxy based on [AppNet.io](https://github.com/InstantWebP2P/appnet.io) and Node.js
+P2P HTTP and SOCKS forward webproxy based on [AppNet.link](https://github.com/InstantWebP2P/appnet.link) and Node.js
 
 ### Features
 
@@ -13,8 +13,8 @@ P2P HTTP and SOCKS forward webproxy based on [AppNet.io](https://github.com/Inst
 
 ### Install manually
 * npm install forward-proxy, or git clone [forward-proxy](https://github.com/InstantWebP2P/forward-proxy.git) && cd forward-proxy && npm install
-* forward-proxy depend on node-httpp, just build it from repo [node-httpp](https://github.com/InstantWebP2P/node-httpp)
-* setup your own AppNet.io backend controller services refer to [AppNet.io-controller](https://github.com/InstantWebP2P/appnet.io-controller)
+* forward-proxy depend on node-httpp, just build it from repo [nodejs-httpp](https://github.com/InstantWebP2P/nodejs-httpp)
+* setup your own AppNet.io backend controller services refer to [AppNet.link-controller](https://github.com/InstantWebP2P/appnet.link-controller)
 
 ### Install with prebuilt packages, just download and unzip it
 * [Windows package](https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-windows.zip)
