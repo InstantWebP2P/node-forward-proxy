@@ -7,9 +7,10 @@ P2P HTTP and SOCKS forward webproxy based on [AppNet.link](https://github.com/In
 
 * HTTP / SOCKS proxy server as forward-proxy import service
 * HTTP CONNECT tunnel over AppNet.io STUN session as forward-proxy export service
-* multi-hop relay over STUN session
-* secure P2P proxy tunnel to build user-defined WebVPN service
-* high UDP data transfer performance
+* Multi-hop relay over STUN session
+* Secure P2P proxy tunnel to build user-defined WebVPN service
+* High UDP data transfer performance
+* Provide end-to-end security
 
 ### Install manually
 * npm install forward-proxy, or git clone [forward-proxy](https://github.com/InstantWebP2P/forward-proxy.git) && cd forward-proxy && npm install
