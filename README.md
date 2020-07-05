@@ -1,7 +1,7 @@
 node-forward-proxy
 ===============
 
-P2P HTTP and SOCKS forward webproxy based on [AppNet.link](https://github.com/InstantWebP2P/appnet.link) and [nodejs-httpp](https://github.com/InstantWebP2P/nodejs-httpp)
+P2P HTTP and SOCKS forward web-proxy based on [AppNet.link](https://github.com/InstantWebP2P/appnet.link) and [nodejs-httpp](https://github.com/InstantWebP2P/nodejs-httpp)
 
 ### Features
 
