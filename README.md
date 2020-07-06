@@ -6,7 +6,7 @@ P2P HTTP and SOCKS forward web-proxy based on [AppNet.link](https://github.com/I
 ### Features
 
 * HTTP / SOCKS proxy server as forward-proxy import service
-* HTTP CONNECT tunnel over AppNet.io STUN session as forward-proxy export service
+* HTTP CONNECT tunnel over [AppNet.link](https://github.com/InstantWebP2P/appnet.link) STUN session as forward-proxy export service
 * Multi-hop relay over STUN session
 * Secure P2P proxy tunnel to build user-defined WebVPN service
 * High UDP data transfer performance
@@ -15,7 +15,7 @@ P2P HTTP and SOCKS forward web-proxy based on [AppNet.link](https://github.com/I
 ### Install manually
 * npm install forward-proxy, or git clone [forward-proxy](https://github.com/InstantWebP2P/forward-proxy.git) && cd forward-proxy && npm install
 * forward-proxy depend on node-httpp, just build it from repo [nodejs-httpp](https://github.com/InstantWebP2P/nodejs-httpp)
-* setup your own AppNet.io backend controller services refer to [AppNet.link-controller](https://github.com/InstantWebP2P/appnet.link-controller)
+* setup your own [AppNet.link](https://github.com/InstantWebP2P/appnet.link) backend controller services refer to [AppNet.link-controller](https://github.com/InstantWebP2P/appnet.link-controller)
 
 ### Install with prebuilt packages, just download and unzip it
 * [Windows package](https://github.com/InstantWebP2P/node-forward-proxy/archive/pkg-release-windows.zip)
