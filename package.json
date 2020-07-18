@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git://github.com/InstantWebP2P/node-forward-proxy.git"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/" 
+  },
   "keywords": [
     "p2p",
     "http",
