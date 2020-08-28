@@ -1,7 +1,7 @@
 node-forward-proxy
 ===============
 
-P2P SOCKS5 Gateway based on [AppNet.link](https://github.com/InstantWebP2P/appnet.link) and [nodejs-httpp](https://github.com/InstantWebP2P/nodejs-httpp)
+Secure P2P HTTP and SOCKS5 Gateway based on [AppNet.link](https://github.com/InstantWebP2P/appnet.link) and [nodejs-httpp](https://github.com/InstantWebP2P/nodejs-httpp)
 
 ### Features
 
