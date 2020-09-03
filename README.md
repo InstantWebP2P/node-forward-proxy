@@ -5,7 +5,7 @@ Secure P2P HTTP and SOCKS5 Gateway based on [AppNet.link](https://github.com/Ins
 
 ### Features
 
-* HTTP / SOCKS proxy server as forward-proxy import service
+* HTTP / SOCKS5(4/4a) proxy server as forward-proxy import service
 * HTTP CONNECT tunnel over [AppNet.link](https://github.com/InstantWebP2P/appnet.link) STUN session as forward-proxy export service
 * Multi-hop relay over STUN session
 * Secure P2P proxy tunnel to build user-defined WebVPN service
