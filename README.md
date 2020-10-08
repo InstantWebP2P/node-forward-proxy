@@ -32,7 +32,7 @@ Secure P2P HTTP and SOCKS5 Tunnel based on [AppNet.link](https://github.com/Inst
 * web browser is http proxy / socks proxy client
 * after setup export service and start http or socks server, then set web browser proxy settings point to http/socks server
 * for forward-proxy util, refer to bin/forward-proxy. to start it, just node bin/forward-proxy --key usrkey(MUST) --http_port xxx --socks_port xxx --export_vurl vURL --enable_export
-* export/import service's usrkey MUST same
+* export/import service's usrkey MUST be same
 
 ### License
 
