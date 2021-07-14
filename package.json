@@ -1,7 +1,7 @@
 {
   "author": "Tom Zhou <appnet.link@gmail.com> (https://appnet.link)",
   "name": "forward-proxy",
-  "description": "p2p http forward and socks proxy based on AppNet.io and Node.js",
+  "description": "p2p http forward and socks proxy based on AppNet.link and Node.js",
   "version": "3.3.2",
   "repository": {
     "type": "git",
